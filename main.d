@@ -1,6 +1,9 @@
 import std.stdio;
+import log;
 
 void main(string[] args)
 {
-	writeln("Beautifier in progress");
+	startLogger();
+	setLevel(LogLevel.DEBUG);
+	logInfo("Beautifier in progress");
 }
