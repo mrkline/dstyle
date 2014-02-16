@@ -4,6 +4,7 @@ import log;
 void main(string[] args)
 {
 	startLogger();
-	setLevel(LogLevel.DEBUG);
+	logLevel = LogLevel.DEBUG;
+	assert(loggerRunning);
 	logInfo("Beautifier in progress");
 }

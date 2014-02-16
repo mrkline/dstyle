@@ -14,6 +14,11 @@ enum LogLevel {
 	DEBUG,
 }
 
+private enum LoggerCommand {
+	GET_LEVEL,
+	STOP
+}
+
 private struct Logger {
 
 	LogLevel level;
@@ -23,7 +28,7 @@ private struct Logger {
 		level = l;
 	}
 
-	void log(LogLevel l, string message, string file = __FILE__, int line = __LINE__)
+	void log(LogLevel l, lazy string message, string file = __FILE__, int line = __LINE__)
 	{
 		if(l >= level)
 			return;
@@ -44,7 +49,18 @@ private void logLoop()
 		receive(
 			(LogLevel l) { theLogger.level = l; },
 			(LogLevel l, string msg, string f, int n) { theLogger.log(l, msg, f, n); },
-			(OwnerTerminated o) { run = false; }
+			(OwnerTerminated o) { run = false; },
+			(LoggerCommand command, Tid querier) {
+				final switch(command) {
+					case LoggerCommand.GET_LEVEL:
+						querier.send(theLogger.level);
+						break;
+					case LoggerCommand.STOP:
+						run = false;
+						querier.send(command);
+						break;
+				}
+			}
 		);
 	}
 }
@@ -57,7 +73,17 @@ void startLogger()
 	register(loggerThreadName, startedLogger);
 }
 
-void log(LogLevel l)(string message, string file = __FILE__, int line = __LINE__)
+void stopLogger()
+{
+	Tid loggerThread = locate(loggerThreadName);
+	enforce(loggerThread != Tid.init, "The logger is not running.");
+	loggerThread.send(LoggerCommand.STOP, thisTid);
+	enforce(receiveOnly!LoggerCommand() == LoggerCommand.STOP, "Stop command got an unexpected response");
+}
+
+@property bool loggerRunning() { return locate(loggerThreadName) != Tid.init; }
+
+void log(LogLevel l)(lazy string message, string file = __FILE__, int line = __LINE__)
 {
 	Tid loggerThread = locate(loggerThreadName);
 	enforce(loggerThread != Tid.init, "Logger is not running");
@@ -69,9 +95,27 @@ alias log!(LogLevel.WARN) logWarn;
 alias log!(LogLevel.INFO) logInfo;
 alias log!(LogLevel.DEBUG) logDebug;
 
-void setLevel(LogLevel l)
+@property void logLevel(LogLevel l)
 {
 	Tid loggerThread = locate(loggerThreadName);
 	enforce(loggerThread != Tid.init, "Logger is not running");
 	loggerThread.send(l);
+}
+
+@property LogLevel logLevel()
+{
+	Tid loggerThread = locate(loggerThreadName);
+	enforce(loggerThread != Tid.init, "Logger is not running");
+	loggerThread.send(LoggerCommand.GET_LEVEL, thisTid);
+	return receiveOnly!LogLevel();
+}
+
+unittest {
+	assert(!loggerRunning);
+	startLogger();
+	assert(loggerRunning);
+	logLevel = LogLevel.DEBUG;
+	assert(logLevel == LogLevel.DEBUG);
+	stopLogger();
+	assert(!loggerRunning);
 }
