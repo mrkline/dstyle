@@ -6,6 +6,7 @@ import log;
 
 import std.algorithm;
 import std.conv;
+import std.file; // For unit tests
 import std.range;
 import std.uni;
 
@@ -13,7 +14,7 @@ import std.uni;
 
 ScannedFile scanFile(string file, TokenGenerator[] generators)
 {
-	scope(failure) logCacheClear("scanloop");
+	scope(failure) logCacheFlush("scanloop");
 
 	Token[] fileTokens;
 
@@ -27,7 +28,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 	// Generators that are still valid for the current sequence. When this list becomes empty,
 	// - If we have a finalist, the sequence is that token
 	// - If we have no finalists, the sequence is unrecognized
-	TokenGenerator[] contenders;
+	TokenGenerator[] contenders = generators;
 
 	// Generators which reached a final state in the last character
 	TokenGenerator[] finalists;
@@ -73,7 +74,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 			}
 			else {
 				logCacheDebug("scanloop", contenders[it].name ~ " dropping out");
-				contenders.remove(it);
+				contenders = contenders.remove(it);
 			}
 		}
 
@@ -93,7 +94,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 
 			// We have a single finalist
 			const winner = finalists.front;
-			fileTokens ~= new Token(winner.tokenID, file[tokenStart .. c], startingLine, startingCol);
+			fileTokens ~= new Token(winner.tokenID, file[tokenStart .. i], startingLine, startingCol);
 
 			logInfo("token " ~ fileTokens.back.toString() ~
 				" (" ~ startingLine.to!string ~ ":" ~ startingCol.to!string ~ ")");
@@ -114,7 +115,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 			}
 
 			// Reset the works
-			tokenStart = c;
+			tokenStart = i;
 			startingLine = line;
 			startingCol = col;
 			contenders = generators.dup;
@@ -171,3 +172,64 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 
 	return ScannedFile(file, fileTokens, unixNewlines, windowsNewlines, macNewlines);
 }
+
+@trusted:
+
+unittest
+{
+	startLogger();
+	scope(exit) stopLogger();
+	logLevel = LogLevel.DEBUG;
+	auto scanned = scanFile(readText("testfiles/newline.txt"), [new NewlineGenerator]);
+	assert(scanned.unixNewlines == 1);
+	assert(scanned.windowsNewlines == 2);
+	assert(scanned.macNewlines == 1);
+}
+
+/*
+unittest
+{
+	using namespace std;
+	using namespace Scanner;
+	auto scanned = scanFile("testfiles/whitespace.txt", {make_shared<NewlineGenerator>(),
+	                                                     make_shared<WhitespaceGenerator>()});
+	TEST_ASSERT(scanned->unixNewlines == 4);
+	TEST_ASSERT(scanned->windowsNewlines == 0);
+	TEST_ASSERT(scanned->macNewlines == 0);
+	// Assert that the newlines are indented properly
+	TEST_ASSERT(scanned->tokens[0].col == 1);
+	TEST_ASSERT(scanned->tokens[2].col == 5);
+	TEST_ASSERT(scanned->tokens[4].col == 5);
+	TEST_ASSERT(scanned->tokens[6].col == 5);
+}
+
+
+void staticTokenTest()
+{
+	using namespace std;
+	using namespace Scanner;
+
+	enum TestID : GrammarElementID {
+		TI_CLASS = Token::TI_UNCOMMON_START,
+		TI_STRUCT
+	};
+
+	auto scanned = scanFile("testfiles/statics.txt",
+		{make_shared<NewlineGenerator>(),
+		 make_shared<WhitespaceGenerator>(),
+		 make_shared<StaticTokenGenerator>("class", TI_CLASS),
+		 make_shared<StaticTokenGenerator>("struct", TI_STRUCT)
+		});
+}
+
+void idTokenTest()
+{
+	using namespace std;
+	using namespace Scanner;
+	auto scanned = scanFile("testfiles/IDs.txt",
+		{make_shared<NewlineGenerator>(),
+		 make_shared<WhitespaceGenerator>(),
+		 make_shared<IDTokenGenerator>()
+		});
+}
+*/

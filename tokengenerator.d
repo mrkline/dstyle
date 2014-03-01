@@ -1,4 +1,5 @@
 import grammardefinition;
+import token;
 
 @safe:
 
@@ -20,4 +21,50 @@ interface TokenGenerator {
 
 	@property string name() const;
 
+}
+
+class NewlineGenerator : TokenGenerator {
+
+
+	override void reset()
+	{
+		last = '\0';
+		num = 0;
+	}
+
+	override bool next(char c)
+	{
+		if (++num > 2)
+			return false;
+
+		bool ret;
+		if ((c == '\r' || c == '\n') && c != last)
+			ret = true;
+		else
+			ret = false;
+
+		last = c;
+
+		return ret;
+	}
+
+	@property override bool isInFinalState() const
+	{
+		// Will be removed by the list of finalists before it can be checked if it is not one
+		return true;
+	}
+
+	@property override GrammarElementID tokenID() const
+	{
+		return CommonTokenIDs.NEWLINE;
+	}
+
+	@property override string name() const
+	{
+		return "Newline";
+	}
+
+private:
+	char last = '\0';
+	char num = 0;
 }
