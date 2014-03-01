@@ -73,6 +73,10 @@ private string loggerThreadName = "logger_thread";
 private void logLoop()
 {
 	try {
+		// If we have lots of messages to process at once, we're probably stuck in a loop or something.
+		// We shouldn't be logging _that_ much.
+		setMaxMailboxSize(thisTid, 100, OnCrowding.throwException);
+
 		Logger theLogger;
 
 		// TDOO: Actually log everything even if we get an OOB
