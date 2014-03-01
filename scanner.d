@@ -2,14 +2,19 @@ import config;
 import token;
 import tokengenerator;
 import scannedfile;
+import log;
 
 import std.algorithm;
+import std.conv;
 import std.range;
+import std.uni;
 
 @safe:
 
 ScannedFile scanFile(string file, TokenGenerator[] generators)
 {
+	scope(failure) logCacheClear("scanloop");
+
 	Token[] fileTokens;
 
 	int line = 1;
@@ -45,14 +50,12 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 		immutable char c = file[i];
 
 		// Reintroduce logging later
-		/*
-		if (isgraph(*c))
-			LOG_CACHE_DEBUG("scanloop", string("char is ") + *c);
-		else if (*c < 0 ) // Non-ASCII characters in UTF-8 are negative
-			LOG_CACHE_DEBUG("scanloop", "char is non-ASCII");
+		if (isGraphical(c))
+			logCacheDebug("scanloop", "char is " ~ c);
+		else if (c < 0 ) // Non-ASCII characters in UTF-8 are negative
+			logCacheDebug("scanloop", "char is non-ASCII");
 		else
-			LOG_CACHE_DEBUG("scanloop", "char is \\w");
-		*/
+			logCacheDebug("scanloop", "char is \\w");
 
 		// Increment the column counter per space
 		if (c == ' ') {
@@ -69,7 +72,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 				++it;
 			}
 			else {
-				// LOG_CACHE_DEBUG("scanloop", string((*it)->getName()) + " dropping out");
+				logCacheDebug("scanloop", contenders[it].name ~ " dropping out");
 				contenders.remove(it);
 			}
 		}
@@ -92,18 +95,9 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 			const winner = finalists.front;
 			fileTokens ~= new Token(winner.tokenID, file[tokenStart .. c], startingLine, startingCol);
 
-			/*
-			stringstream logstr;
-			logstr << "token ";
-			logstr << fileTokens.back().asString();
-			logstr << " (";
-			logstr << startingLine;
-			logstr << ":";
-			logstr << startingCol;
-			logstr << ")";
-			LOG_INFO(logstr.str());
-			LOG_CACHE_CLEAR("scanloop");
-			*/
+			logInfo("token " ~ fileTokens.back.toString() ~
+				" (" ~ startingLine.to!string ~ ":" ~ startingCol.to!string ~ ")");
+			logCacheClear("scanloop");
 
 			// If the winner is a newline, figure out what kind it is and add to that tally
 			if (winner.tokenID == CommonTokenIDs.NEWLINE) {
@@ -160,18 +154,9 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 	TokenGenerator winner = finalists.front;
 	fileTokens ~= new Token(winner.tokenID, file[tokenStart .. $], startingLine, startingCol);
 
-	/*
-	stringstream logstr;
-	logstr << "token ";
-	logstr << fileTokens.back().asString();
-	logstr << " (";
-	logstr << startingLine;
-	logstr << ":";
-	logstr << startingCol;
-	logstr << ")";
-	LOG_INFO(logstr.str());
-	LOG_CACHE_CLEAR("scanloop");
-	*/
+	logInfo("token " ~ fileTokens.back.toString() ~
+		" (" ~ startingLine.to!string ~ ":" ~ startingCol.to!string ~ ")");
+	logCacheClear("scanloop");
 
 	if (winner.tokenID == CommonTokenIDs.NEWLINE) {
 		if (fileTokens.back.length == 2)
