@@ -2,7 +2,7 @@
 # basic makefile for D language - made by darkstalker
 
 DCC = dmd
-DFLAGS += -w
+DFLAGS += -wi
 LIBS =
 SRC = $(wildcard *.d)
 OBJ = $(SRC:.d=.o)
