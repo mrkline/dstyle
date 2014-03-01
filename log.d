@@ -34,7 +34,7 @@ private struct Logger {
 
 	void log(LogLevel l, lazy string message, string file = __FILE__, int line = __LINE__)
 	{
-		if(l >= level)
+		if(l > level)
 			return;
 
 		writeln(l.to!string, ": ", message, " (", file, ":", line.to!string, ")");
@@ -42,7 +42,7 @@ private struct Logger {
 
 	void logCache(LogLevel l, string cache, lazy string message, string file = __FILE__, int line = __LINE__)
 	{
-		if (l >= level)
+		if (l > level)
 			return;
 
 		caches[cache] ~= l.to!string ~ ": " ~ message ~ " (" ~ file ~ ":" ~ line.to!string ~ ")\n";
@@ -51,7 +51,10 @@ private struct Logger {
 	void flushCache(string cache)
 	{
 		string* c = cache in caches;
-		enforce(c != null, "No such cache exists.");
+
+		if(c == null) // If the cache doesn't exist, there's nothing in it, right?
+			return;
+
 		write(*c);
 		// Do we want to remove the cache, or just clear it?
 		caches.remove(cache);
@@ -69,52 +72,58 @@ private string loggerThreadName = "logger_thread";
 
 private void logLoop()
 {
-	Logger theLogger;
+	try {
+		Logger theLogger;
 
-	// TDOO: Actually log everything even if we get an OOB
-	bool run = true;
-	while (run) {
-		receive(
-			(LogLevel l) { theLogger.level = l; },
+		// TDOO: Actually log everything even if we get an OOB
+		bool run = true;
+		while (run) {
+			receive(
+				(LogLevel l) { theLogger.level = l; },
 
-			(LogLevel l, lazy string msg, string f, int n) { theLogger.log(l, msg, f, n); },
+				(LogLevel l, lazy string msg, string f, int n) { theLogger.log(l, msg, f, n); },
 
-			(LogLevel l, string cache, lazy string msg, string f, int n) { theLogger.logCache(l, cache, msg, f, n); },
+				(LogLevel l, string cache, lazy string msg, string f, int n) { theLogger.logCache(l, cache, msg, f, n); },
 
-			(OwnerTerminated o) { run = false; },
+				(OwnerTerminated o) { run = false; },
 
-			(LoggerCommand command, Tid querier) {
-				switch(command) {
-					case LoggerCommand.GET_LEVEL:
-						querier.send(theLogger.level);
-						break;
-					case LoggerCommand.STOP:
-						run = false;
-						querier.send(command);
-						break;
+				(LoggerCommand command, Tid querier) {
+					switch(command) {
+						case LoggerCommand.GET_LEVEL:
+							querier.send(theLogger.level);
+							break;
+						case LoggerCommand.STOP:
+							run = false;
+							querier.send(command);
+							break;
 
-					default:
-						// What? Bail
-						run = false;
+						default:
+							// What? Bail
+							assert(0);
+					}
+				},
+
+				(LoggerCommand command, Tid querier, string cache) {
+					switch(command) {
+						case LoggerCommand.FLUSH_CACHE:
+							theLogger.flushCache(cache);
+							querier.send(command); // Synchronize on flush
+							break;
+
+						case LoggerCommand.CLEAR_CACHE:
+							theLogger.clearCache(cache);
+							break;
+
+						default:
+							// What? Bail
+							assert(0);
+					}
 				}
-			},
-
-			(LoggerCommand command, string cache) {
-				switch(command) {
-					case LoggerCommand.FLUSH_CACHE:
-						theLogger.flushCache(cache);
-						break;
-
-					case LoggerCommand.CLEAR_CACHE:
-						theLogger.clearCache(cache);
-						break;
-
-					default:
-						// What? Bail
-						run = false;
-				}
-			}
-		);
+			);
+		}
+	}
+	catch (Exception ex) {
+		stderr.writeln("Logger died with:\n" ~ ex.to!string);
 	}
 }
 
@@ -160,13 +169,15 @@ alias logCache!(LogLevel.DEBUG) logCacheDebug;
 void logCacheFlush(string cache)
 {
 	Tid loggerThread = enforceRunning();
-	loggerThread.send(LoggerCommand.FLUSH_CACHE, cache);
+	loggerThread.send(LoggerCommand.FLUSH_CACHE, thisTid, cache);
+	// Synchronize on flush
+	enforce(receiveOnly!LoggerCommand() == LoggerCommand.FLUSH_CACHE, "Flush got unexpected ackknowledgement");
 }
 
 void logCacheClear(string cache)
 {
 	Tid loggerThread = enforceRunning();
-	loggerThread.send(LoggerCommand.CLEAR_CACHE, cache);
+	loggerThread.send(LoggerCommand.CLEAR_CACHE, thisTid, cache);
 }
 
 @property void logLevel(LogLevel l)
