@@ -1,12 +1,13 @@
 import config;
+import grammardefinition;
+import log;
+import scannedfile;
 import token;
 import tokengenerator;
-import scannedfile;
-import log;
 
 import std.algorithm;
 import std.conv;
-import std.file; // For unit tests
+import std.file, std.stdio; // For unit tests
 import std.range;
 import std.uni;
 
@@ -28,7 +29,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 	// Generators that are still valid for the current sequence. When this list becomes empty,
 	// - If we have a finalist, the sequence is that token
 	// - If we have no finalists, the sequence is unrecognized
-	TokenGenerator[] contenders = generators;
+	TokenGenerator[] contenders = generators.dup;
 
 	// Generators which reached a final state in the last character
 	TokenGenerator[] finalists;
@@ -181,6 +182,8 @@ unittest
 	scope(exit) stopLogger();
 	logLevel = LogLevel.DEBUG;
 
+	writeln("Beginning newline test");
+
 	auto scanned = scanFile(readText("testfiles/newline.txt"), [new NewlineGenerator]);
 	assert(scanned.unixNewlines == 1);
 	assert(scanned.windowsNewlines == 2);
@@ -192,6 +195,8 @@ unittest
 	startLogger();
 	scope(exit) stopLogger();
 	logLevel = LogLevel.DEBUG;
+
+	writeln("Beginning whitespace test");
 
 	TokenGenerator[] gens;
 	gens ~= new NewlineGenerator();
@@ -207,25 +212,28 @@ unittest
 	assert(scanned.tokens[6].col == 5);
 }
 
-/*
-void staticTokenTest()
+unittest
 {
-	using namespace std;
-	using namespace Scanner;
+	startLogger();
+	scope(exit) stopLogger();
+	logLevel = LogLevel.DEBUG;
+
+	writeln("Beginning static token test");
 
 	enum TestID : GrammarElementID {
-		TI_CLASS = Token::TI_UNCOMMON_START,
-		TI_STRUCT
-	};
+		CLASS = CommonTokenIDs.UNCOMMON_START,
+		STRUCT
+	}
 
-	auto scanned = scanFile("testfiles/statics.txt",
-		{make_shared<NewlineGenerator>(),
-		 make_shared<WhitespaceGenerator>(),
-		 make_shared<StaticTokenGenerator>("class", TI_CLASS),
-		 make_shared<StaticTokenGenerator>("struct", TI_STRUCT)
-		});
+	TokenGenerator[] gens;
+	gens ~= new NewlineGenerator;
+	gens ~= new WhitespaceGenerator;
+	gens ~= new StaticTokenGenerator("class", TestID.CLASS);
+	gens ~= new StaticTokenGenerator("struct", TestID.STRUCT);
+	auto scanned = scanFile(readText("testfiles/statics.txt"), gens);
 }
 
+/*
 void idTokenTest()
 {
 	using namespace std;

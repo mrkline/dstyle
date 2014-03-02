@@ -71,3 +71,34 @@ class WhitespaceGenerator : TokenGenerator {
 
 	@property override string name() const { return "Whitespace"; }
 }
+
+class StaticTokenGenerator : TokenGenerator {
+
+	this(string tok, GrammarElementID ttype)
+	{
+		token = tok;
+		type = ttype;
+		idx = 0;
+	}
+
+	override void reset() { idx = 0; }
+
+	override bool next(char c) {
+		if (idx >= token.length)
+			return false;
+
+		return token[idx++] == c;
+	}
+
+	@property override bool isInFinalState() const { return idx == token.length; }
+
+	@property override GrammarElementID tokenID() const { return type; }
+
+	@property override string name() const { return token; }
+
+private:
+	immutable string token;
+	immutable GrammarElementID type;
+	size_t idx;
+
+}
