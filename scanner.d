@@ -180,30 +180,34 @@ unittest
 	startLogger();
 	scope(exit) stopLogger();
 	logLevel = LogLevel.DEBUG;
+
 	auto scanned = scanFile(readText("testfiles/newline.txt"), [new NewlineGenerator]);
 	assert(scanned.unixNewlines == 1);
 	assert(scanned.windowsNewlines == 2);
 	assert(scanned.macNewlines == 1);
 }
 
-/*
 unittest
 {
-	using namespace std;
-	using namespace Scanner;
-	auto scanned = scanFile("testfiles/whitespace.txt", {make_shared<NewlineGenerator>(),
-	                                                     make_shared<WhitespaceGenerator>()});
-	TEST_ASSERT(scanned->unixNewlines == 4);
-	TEST_ASSERT(scanned->windowsNewlines == 0);
-	TEST_ASSERT(scanned->macNewlines == 0);
+	startLogger();
+	scope(exit) stopLogger();
+	logLevel = LogLevel.DEBUG;
+
+	TokenGenerator[] gens;
+	gens ~= new NewlineGenerator();
+	gens ~= new WhitespaceGenerator();
+	auto scanned = scanFile(readText("testfiles/whitespace.txt"), gens);
+	assert(scanned.unixNewlines == 4);
+	assert(scanned.windowsNewlines == 0);
+	assert(scanned.macNewlines == 0);
 	// Assert that the newlines are indented properly
-	TEST_ASSERT(scanned->tokens[0].col == 1);
-	TEST_ASSERT(scanned->tokens[2].col == 5);
-	TEST_ASSERT(scanned->tokens[4].col == 5);
-	TEST_ASSERT(scanned->tokens[6].col == 5);
+	assert(scanned.tokens[0].col == 1);
+	assert(scanned.tokens[2].col == 5);
+	assert(scanned.tokens[4].col == 5);
+	assert(scanned.tokens[6].col == 5);
 }
 
-
+/*
 void staticTokenTest()
 {
 	using namespace std;

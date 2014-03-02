@@ -25,7 +25,6 @@ interface TokenGenerator {
 
 class NewlineGenerator : TokenGenerator {
 
-
 	override void reset()
 	{
 		last = '\0';
@@ -48,23 +47,27 @@ class NewlineGenerator : TokenGenerator {
 		return ret;
 	}
 
-	@property override bool isInFinalState() const
-	{
-		// Will be removed by the list of finalists before it can be checked if it is not one
-		return true;
-	}
+	// Will be removed by the list of finalists before it can be checked if it is not one
+	@property override bool isInFinalState() const { return true; }
 
-	@property override GrammarElementID tokenID() const
-	{
-		return CommonTokenIDs.NEWLINE;
-	}
+	@property override GrammarElementID tokenID() const { return CommonTokenIDs.NEWLINE; }
 
-	@property override string name() const
-	{
-		return "Newline";
-	}
+	@property override string name() const { return "Newline"; }
 
 private:
 	char last = '\0';
 	char num = 0;
+}
+
+class WhitespaceGenerator : TokenGenerator {
+
+	override void reset() { }
+
+	override bool next(char c) { return c == ' ' || c == '\t'; }
+
+	@property override bool isInFinalState() const { return true; }
+
+	@property override GrammarElementID tokenID() const { return CommonTokenIDs.SPACE; }
+
+	@property override string name() const { return "Whitespace"; }
 }
