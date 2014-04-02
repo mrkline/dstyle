@@ -63,7 +63,9 @@ private struct Logger {
 	// Do we want to remove the cache, or just clear it?
 	void clearCache(string cache)
 	{
-		enforce(cache in caches, "No such cache exists.");
+		if (!(cache in caches))
+			return; // Done! :P
+
 		caches.remove(cache);
 	}
 }
@@ -131,26 +133,20 @@ private void logLoop()
 	}
 }
 
-void startLogger()
+static this()
 {
-	enforce(locate(loggerThreadName) == Tid.init, "The logger has already been started.");
+	if (locate(loggerThreadName) != Tid.init) // The main thread has already started the logger
+		return;
 	Tid startedLogger = spawn(&logLoop);
 	assert(startedLogger != Tid.init);
 	register(loggerThreadName, startedLogger);
-}
-
-void stopLogger()
-{
-	Tid loggerThread = enforceRunning();
-	loggerThread.send(LoggerCommand.STOP, thisTid);
-	enforce(receiveOnly!LoggerCommand() == LoggerCommand.STOP, "Stop command got an unexpected response");
 }
 
 @property bool loggerRunning() { return locate(loggerThreadName) != Tid.init; }
 
 void log(LogLevel l)(lazy string message, string file = __FILE__, int line = __LINE__)
 {
-	Tid loggerThread = enforceRunning();
+	Tid loggerThread = locate(loggerThreadName);
 	loggerThread.send(l, message, file, line);
 }
 
@@ -161,7 +157,7 @@ alias log!(LogLevel.DEBUG) logDebug;
 
 void logCache(LogLevel l)(string cache, lazy string message, string file = __FILE__, int line = __LINE__)
 {
-	Tid loggerThread = enforceRunning();
+	Tid loggerThread = locate(loggerThreadName);
 	loggerThread.send(l, cache, message, file, line);
 }
 
@@ -172,7 +168,7 @@ alias logCache!(LogLevel.DEBUG) logCacheDebug;
 
 void logCacheFlush(string cache)
 {
-	Tid loggerThread = enforceRunning();
+	Tid loggerThread = locate(loggerThreadName);
 	loggerThread.send(LoggerCommand.FLUSH_CACHE, thisTid, cache);
 	// Synchronize on flush
 	enforce(receiveOnly!LoggerCommand() == LoggerCommand.FLUSH_CACHE, "Flush got unexpected ackknowledgement");
@@ -180,36 +176,25 @@ void logCacheFlush(string cache)
 
 void logCacheClear(string cache)
 {
-	Tid loggerThread = enforceRunning();
+	Tid loggerThread = locate(loggerThreadName);
 	loggerThread.send(LoggerCommand.CLEAR_CACHE, thisTid, cache);
 }
 
 @property void logLevel(LogLevel l)
 {
-	Tid loggerThread = enforceRunning();
+	Tid loggerThread = locate(loggerThreadName);
 	loggerThread.send(l);
 }
 
 @property LogLevel logLevel()
 {
-	Tid loggerThread = enforceRunning();
+	Tid loggerThread = locate(loggerThreadName);
 	loggerThread.send(LoggerCommand.GET_LEVEL, thisTid);
 	return receiveOnly!LogLevel();
 }
 
-private Tid enforceRunning()
-{
-	Tid loggerThread = locate(loggerThreadName);
-	enforce(loggerThread != Tid.init, "Logger is not running");
-	return loggerThread;
-}
-
 unittest {
-	assert(!loggerRunning);
-	startLogger();
-	assert(loggerRunning);
 	logLevel = LogLevel.DEBUG;
 	assert(logLevel == LogLevel.DEBUG);
-	stopLogger();
-	assert(!loggerRunning);
+	logDebug("Hi, I'm a log message!");
 }

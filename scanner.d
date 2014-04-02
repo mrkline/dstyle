@@ -178,10 +178,6 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 
 unittest
 {
-	startLogger();
-	scope(exit) stopLogger();
-	logLevel = LogLevel.DEBUG;
-
 	writeln("Beginning newline test");
 
 	auto scanned = scanFile(readText("testfiles/newline.txt"), [new NewlineGenerator]);
@@ -192,10 +188,6 @@ unittest
 
 unittest
 {
-	startLogger();
-	scope(exit) stopLogger();
-	logLevel = LogLevel.DEBUG;
-
 	writeln("Beginning whitespace test");
 
 	TokenGenerator[] gens;
@@ -214,10 +206,6 @@ unittest
 
 unittest
 {
-	startLogger();
-	scope(exit) stopLogger();
-	logLevel = LogLevel.DEBUG;
-
 	writeln("Beginning static token test");
 
 	enum TestID : GrammarElementID {
