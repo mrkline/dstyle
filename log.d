@@ -133,12 +133,9 @@ private void logLoop()
 	}
 }
 
-static this()
+shared static this()
 {
-	if (locate(loggerThreadName) != Tid.init) // The main thread has already started the logger
-		return;
 	Tid startedLogger = spawn(&logLoop);
-	assert(startedLogger != Tid.init);
 	register(loggerThreadName, startedLogger);
 }
 
