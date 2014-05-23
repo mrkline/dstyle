@@ -4,7 +4,6 @@ import grammardefinition;
 
 /// Common token types, used by the scanner and all languages.
 /// Languages should obviously avoid using these values for other token types.
-/// Values are negative to avoid conflicts
 enum CommonTokenIDs : GrammarElementID {
 	SPACE, ///< Tabs and spaces
 	NEWLINE, ///< A newline

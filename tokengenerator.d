@@ -1,3 +1,5 @@
+import std.ascii;
+
 import grammardefinition;
 import token;
 
@@ -36,12 +38,7 @@ class NewlineGenerator : TokenGenerator {
 		if (++num > 2)
 			return false;
 
-		bool ret;
-		if ((c == '\r' || c == '\n') && c != last)
-			ret = true;
-		else
-			ret = false;
-
+		immutable bool ret = (c == '\r' || c == '\n') && c != last;
 		last = c;
 
 		return ret;
@@ -83,7 +80,8 @@ class StaticTokenGenerator : TokenGenerator {
 
 	override void reset() { idx = 0; }
 
-	override bool next(char c) {
+	override bool next(char c)
+	{
 		if (idx >= token.length)
 			return false;
 
@@ -100,5 +98,32 @@ private:
 	immutable string token;
 	immutable GrammarElementID type;
 	size_t idx;
+}
 
+/// Recognizes C-style IDs
+class IDTokenGenerator : TokenGenerator {
+
+	override void reset() { hasNonDigit = false; }
+
+	override bool next(char c)
+	{
+		if (isAlpha(c) || c == '_' || c < 0) {
+			hasNonDigit = true;
+			return true;
+		}
+
+		if (isDigit(c) && hasNonDigit)
+			return true;
+
+		return false;
+	}
+
+	@property override bool isInFinalState() const { return true; }
+
+	@property override GrammarElementID tokenID() const { return CommonTokenIDs.SPACE; }
+
+	@property override string name() const { return "ID"; }
+
+private:
+	bool hasNonDigit = false;
 }

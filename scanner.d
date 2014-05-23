@@ -221,15 +221,12 @@ unittest
 	auto scanned = scanFile(readText("testfiles/statics.txt"), gens);
 }
 
-/*
-void idTokenTest()
+unittest
 {
-	using namespace std;
-	using namespace Scanner;
-	auto scanned = scanFile("testfiles/IDs.txt",
-		{make_shared<NewlineGenerator>(),
-		 make_shared<WhitespaceGenerator>(),
-		 make_shared<IDTokenGenerator>()
-		});
+	writeln("Beginning ID token test");
+	TokenGenerator[] gens;
+	gens ~= new NewlineGenerator;
+	gens ~= new WhitespaceGenerator;
+	gens ~= new IDTokenGenerator;
+	auto scanned = scanFile(readText("testfiles/IDs.txt"), gens);
 }
-*/
