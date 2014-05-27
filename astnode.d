@@ -21,9 +21,9 @@ class ASTNode : GrammarElement {
 		parent = p;
 	}
 
-	override const Token* asTerminal(GrammarElementID) const { return null; }
+	override const(Token*) asTerminal(GrammarElementID) const { return null; }
 
-	override const Token* asTerminal() const { return null; }
+	override const(Token*) asTerminal() const { return null; }
 
 	override ASTNode* asNonTerminal(GrammarElementID i) { return id == i ? &this : null; }
 

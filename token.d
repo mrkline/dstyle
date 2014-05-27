@@ -1,4 +1,6 @@
 import grammardefinition;
+import grammarelement;
+import astnode;
 
 @safe:
 
@@ -16,7 +18,7 @@ enum CommonTokenIDs : GrammarElementID {
 }
 
 /// A token, scanned from a source file
-class Token {
+class Token : GrammarElement {
 
 	this(GrammarElementID i, string r, int l, int c)
 	{
@@ -27,6 +29,14 @@ class Token {
 	}
 
 	@property size_t length() const { return rep.length; }
+
+	override const(Token*) asTerminal(GrammarElementID i) const { return id == i ? &this : null; }
+
+	override const(Token*) asTerminal() const { return &this; }
+
+	override ASTNode* asNonTerminal(GrammarElementID) { return null; }
+
+	override ASTNode* asNonTerminal() { return null; }
 
 	override string toString()
 	{
