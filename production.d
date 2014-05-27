@@ -19,12 +19,6 @@ struct Production {
 		elements = elems.dup;
 		translator = trans;
 	}
-
-	bool opEquals(in Production o)
-	{
-		return elements == o.elements
-			&& translator == o.translator;
-	}
 }
 
 @trusted:
