@@ -13,7 +13,7 @@ struct GrammarTreeNode {
 		edges = edges.dup;
 	}
 
-	GrammarTreeNode* addChild(ref in GrammarDefinition def)
+	GrammarTreeNode* addChildAsNeeded(ref in GrammarDefinition def)
 	{
 		auto existing = def in edges;
 
@@ -29,7 +29,7 @@ struct GrammarTreeNode {
 
 	/// \brief A pointer to a grammar definition if this is the first element in a production,
 	///        otherwise null
-	immutable GrammarDefinition* reduction;
+	GrammarDefinition* reduction;
 
 	GrammarTreeNode*[GrammarDefinition] edges;
 }
@@ -42,9 +42,9 @@ unittest
 	GrammarTreeNode base;
 	assert(base.reduction == null);
 	immutable GrammarDefinition nextDef = GrammarDefinition(ElementType.TERM, 42, 2);
-	GrammarTreeNode* next = base.addChild(nextDef);
+	GrammarTreeNode* next = base.addChildAsNeeded(nextDef);
 	immutable GrammarDefinition lastDef = GrammarDefinition(ElementType.NONTERM, 25, 64);
-	GrammarTreeNode* last = next.addChild(lastDef);
+	GrammarTreeNode* last = next.addChildAsNeeded(lastDef);
 	assert(*(nextDef in base.edges) == next);
 	assert(*(lastDef in next.edges) == last);
 	assert((nextDef in last.edges) == null);

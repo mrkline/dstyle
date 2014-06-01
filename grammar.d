@@ -13,29 +13,29 @@ struct Grammar {
 	{
 		enforce(reducesTo.type == ElementType.NONTERM, "A production must reduce to a nonterminal.");
 
-		if (!(reducesTo in productions)) {
-			productions[reducesTo] ~= prod;
+		if (!(reducesTo in productionMap)) {
+			productionMap[reducesTo] ~= prod;
 			return;
 		}
 
-		enforce(!canFind(productions[reducesTo], prod), "The production has already been added.");
+		enforce(!canFind(productionMap[reducesTo], prod), "The production has already been added.");
 
-		productions[reducesTo] ~= prod;
+		productionMap[reducesTo] ~= prod;
 	}
 
 	const(Production[]) productionsThatReduceTo(ref in GrammarDefinition to) const
 	{
-		auto ptr = to in productions;
+		auto ptr = to in productionMap;
 		if (ptr != null)
 			return *ptr;
 		else
 			return [];
 	}
 
-	const(Production[][GrammarDefinition]) getProductions() { return productions; }
+	@property const(Production[][GrammarDefinition]) productions() const { return productionMap; }
 
 private:
-	Production[][GrammarDefinition] productions;
+	Production[][GrammarDefinition] productionMap;
 }
 
 @trusted:
@@ -59,7 +59,7 @@ unittest
 	gram.addProduction(prod1, reducesTo);
 	gram.addProduction(prod2, reducesTo);
 
-	assert(gram.getProductions().length == 1);
+	assert(gram.productions.length == 1);
 
 	auto prods = gram.productionsThatReduceTo(reducesTo);
 
