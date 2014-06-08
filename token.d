@@ -20,9 +20,9 @@ enum CommonTokenIDs : GrammarElementID {
 /// A token, scanned from a source file
 class Token : GrammarElement {
 
-	this(GrammarElementID i, string r, int l, int c)
+	this(GrammarElementID i, string r, int l, int c, int precedence = int.max)
 	{
-		id = i;
+		super(GrammarDefinition(ElementType.TERM, i, precedence));
 		rep = r;
 		line = l;
 		col = c;
@@ -30,7 +30,7 @@ class Token : GrammarElement {
 
 	@property size_t length() const { return rep.length; }
 
-	override const(Token*) asTerminal(GrammarElementID i) const { return id == i ? &this : null; }
+	override const(Token*) asTerminal(GrammarElementID i) const { return def.id == i ? &this : null; }
 
 	override const(Token*) asTerminal() const { return &this; }
 
@@ -40,7 +40,7 @@ class Token : GrammarElement {
 
 	override string toString()
 	{
-		switch (id) {
+		switch (def.id) {
 			case CommonTokenIDs.NEWLINE:
 			return "\\n";
 
@@ -52,7 +52,6 @@ class Token : GrammarElement {
 		}
 	}
 
-	immutable GrammarElementID id;
 	string rep; ///< The string representing the token
 	immutable int line; ///< Line the token starts on
 	immutable int col; ///< Column the token starts on

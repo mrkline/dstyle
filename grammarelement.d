@@ -2,13 +2,22 @@ import grammardefinition;
 import token;
 import astnode;
 
-interface GrammarElement {
+@safe:
 
-	const(Token*) asTerminal(GrammarElementID id) const;
+class GrammarElement {
 
-	const(Token*) asTerminal() const;
+	this(in GrammarDefinition d)
+	{
+		def = d;
+	}
 
-	ASTNode* asNonTerminal(GrammarElementID id);
+	abstract const(Token*) asTerminal(GrammarElementID id) const;
 
-	ASTNode* asNonTerminal();
+	abstract const(Token*) asTerminal() const;
+
+	abstract ASTNode* asNonTerminal(GrammarElementID id);
+
+	abstract ASTNode* asNonTerminal();
+
+	immutable GrammarDefinition def;
 }

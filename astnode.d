@@ -15,9 +15,9 @@ class ASTNode : GrammarElement {
 		STATEMENT ///< sum;
 	}
 
-	this(GrammarElementID i, ASTNode* p = null)
+	this(GrammarElementID i, int precedence = int.max, ASTNode* p = null)
 	{
-		id = i;
+		super(GrammarDefinition(ElementType.NONTERM, i, precedence));
 		parent = p;
 	}
 
@@ -25,11 +25,9 @@ class ASTNode : GrammarElement {
 
 	override const(Token*) asTerminal() const { return null; }
 
-	override ASTNode* asNonTerminal(GrammarElementID i) { return id == i ? &this : null; }
+	override ASTNode* asNonTerminal(GrammarElementID i) { return def.id == i ? &this : null; }
 
 	override ASTNode* asNonTerminal() { return &this; }
-
-	GrammarElementID id;
 
 	ASTNode* parent;
 
