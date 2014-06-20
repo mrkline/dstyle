@@ -2,6 +2,8 @@ import grammardefinition;
 import grammarelement;
 import token;
 
+import std.exception;
+
 @safe:
 
 class ASTNode : GrammarElement {
@@ -17,7 +19,13 @@ class ASTNode : GrammarElement {
 
 	this(GrammarElementID i, int precedence = int.max, ASTNode* p = null)
 	{
-		super(GrammarDefinition(ElementType.NONTERM, i, precedence));
+		this(GrammarDefinition(ElementType.NONTERM, i, precedence), p);
+	}
+
+	this(GrammarDefinition d, ASTNode* p = null)
+	{
+		enforce(d.type == ElementType.NONTERM, "You cannot have an AST node as a terminal.");
+		super(d);
 		parent = p;
 	}
 

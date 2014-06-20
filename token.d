@@ -2,6 +2,8 @@ import grammardefinition;
 import grammarelement;
 import astnode;
 
+import std.exception;
+
 @safe:
 
 /// Common token types, used by the scanner and all languages.
@@ -22,7 +24,13 @@ class Token : GrammarElement {
 
 	this(GrammarElementID i, string r, int l, int c, int precedence = int.max)
 	{
-		super(GrammarDefinition(ElementType.TERM, i, precedence));
+		this(GrammarDefinition(ElementType.TERM, i, precedence), r, l, c);
+	}
+
+	this(GrammarDefinition d, string r, int l, int c)
+	{
+		enforce(d.type == ElementType.TERM, "A token cannot be a non-terminal.");
+		super(d);
 		rep = r;
 		line = l;
 		col = c;

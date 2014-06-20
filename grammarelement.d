@@ -19,5 +19,5 @@ class GrammarElement {
 
 	abstract ASTNode* asNonTerminal();
 
-	immutable GrammarDefinition def;
+	GrammarDefinition def;
 }

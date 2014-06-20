@@ -10,9 +10,9 @@ enum ElementType {
 
 /// A definition of a single terminal or nonterminal
 struct GrammarDefinition {
-	immutable ElementType type; ///< The element's type (terminal or nonterminal)
-	immutable GrammarElementID id; ///< The element's ID
-	immutable int precedence; ///< Lower means sooner in the order of operations. Mostly for terminals
+	ElementType type; ///< The element's type (terminal or nonterminal)
+	GrammarElementID id; ///< The element's ID
+	int precedence; ///< Lower means sooner in the order of operations. Mostly for terminals
 
 	/// Trivial constructor
 	this(ElementType t, GrammarElementID i, int prec = int.max)

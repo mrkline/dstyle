@@ -1,4 +1,5 @@
 import grammardefinition;
+import production;
 
 import std.stdio;
 
@@ -27,8 +28,11 @@ struct GrammarTreeNode {
 		}
 	}
 
-	/// \brief A pointer to a grammar definition if this is the first element in a production,
-	///        otherwise null
+	/// The syntax-directed translation of a production if this node
+	/// represents the first element in a production and it has an SDT
+	Production.SDTCallback translator;
+
+	/// The reduction if this node represents the first element in a production
 	GrammarDefinition* reduction;
 
 	GrammarTreeNode*[GrammarDefinition] edges;
@@ -40,10 +44,10 @@ unittest
 {
 	writeln("Beginning grammar tree node test");
 	GrammarTreeNode base;
-	assert(base.reduction == null);
-	immutable GrammarDefinition nextDef = GrammarDefinition(ElementType.TERM, 42, 2);
+	assert(base.translator == null);
+	immutable auto nextDef = GrammarDefinition(ElementType.TERM, 42, 2);
 	GrammarTreeNode* next = base.addChildAsNeeded(nextDef);
-	immutable GrammarDefinition lastDef = GrammarDefinition(ElementType.NONTERM, 25, 64);
+	immutable auto lastDef = GrammarDefinition(ElementType.NONTERM, 25, 64);
 	GrammarTreeNode* last = next.addChildAsNeeded(lastDef);
 	assert(*(nextDef in base.edges) == next);
 	assert(*(lastDef in next.edges) == last);
