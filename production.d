@@ -11,11 +11,11 @@ struct Production {
 
 	alias ASTNode delegate(GrammarElement[]) SDTCallback;
 
-	immutable GrammarDefinition[] elements;
+	GrammarDefinition[] elements;
 
-	immutable GrammarDefinition reducesTo;
+	GrammarDefinition reducesTo;
 
-	immutable SDTCallback translator;
+	SDTCallback translator;
 
 	this(GrammarDefinition[] elems, GrammarDefinition to, SDTCallback trans)
 	{
