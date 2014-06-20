@@ -1,8 +1,6 @@
 import grammardefinition;
 import production;
 
-import std.stdio;
-
 @safe:
 
 struct GrammarTreeNode {
@@ -38,11 +36,8 @@ struct GrammarTreeNode {
 	GrammarTreeNode*[GrammarDefinition] edges;
 }
 
-@trusted:
-
 unittest
 {
-	writeln("Beginning grammar tree node test");
 	GrammarTreeNode base;
 	assert(base.translator == null);
 	immutable auto nextDef = GrammarDefinition(ElementType.TERM, 42, 2);

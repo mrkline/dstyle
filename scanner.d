@@ -7,7 +7,7 @@ import tokengenerator;
 
 import std.algorithm;
 import std.conv;
-import std.file, std.stdio; // For unit tests
+import std.file; // For unit tests
 import std.range;
 import std.uni;
 
@@ -178,8 +178,6 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 
 unittest
 {
-	writeln("Beginning newline test");
-
 	auto scanned = scanFile(readText("testfiles/newline.txt"), [new NewlineGenerator]);
 	assert(scanned.unixNewlines == 1);
 	assert(scanned.windowsNewlines == 2);
@@ -188,8 +186,6 @@ unittest
 
 unittest
 {
-	writeln("Beginning whitespace test");
-
 	TokenGenerator[] gens;
 	gens ~= new NewlineGenerator();
 	gens ~= new WhitespaceGenerator();
@@ -206,8 +202,6 @@ unittest
 
 unittest
 {
-	writeln("Beginning static token test");
-
 	enum TestID : GrammarElementID {
 		CLASS = CommonTokenIDs.UNCOMMON_START,
 		STRUCT
@@ -223,7 +217,6 @@ unittest
 
 unittest
 {
-	writeln("Beginning ID token test");
 	TokenGenerator[] gens;
 	gens ~= new NewlineGenerator;
 	gens ~= new WhitespaceGenerator;

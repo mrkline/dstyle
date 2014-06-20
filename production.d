@@ -2,7 +2,6 @@ import grammardefinition;
 import grammarelement;
 import astnode;
 
-import std.stdio;
 import std.exception;
 
 @safe:
@@ -28,11 +27,8 @@ struct Production {
 	}
 }
 
-@trusted:
-
 unittest
 {
-	writeln("Beginning production test");
 	auto gd1 = GrammarDefinition(ElementType.NONTERM, 3);
 	auto gd2 = GrammarDefinition(ElementType.NONTERM, 4);
 	auto gd3 = GrammarDefinition(ElementType.TERM, 3);

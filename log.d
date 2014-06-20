@@ -4,6 +4,7 @@ import std.conv;
 import std.concurrency;
 import std.variant;
 
+// Bold claims, I know
 @trusted:
 
 enum LogLevel {
@@ -72,6 +73,7 @@ private struct Logger {
 
 private string loggerThreadName = "logger_thread";
 
+@trusted
 private void logLoop()
 {
 	try {
@@ -193,5 +195,4 @@ void logCacheClear(string cache)
 unittest {
 	logLevel = LogLevel.DEBUG;
 	assert(logLevel == LogLevel.DEBUG);
-	logDebug("Hi, I'm a log message!");
 }
