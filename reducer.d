@@ -19,9 +19,10 @@ import std.exception;
  */
 struct Reducer {
 
-	void build(in Production[] grammar)
+	@disable this();
+
+	this(in Production[] grammar)
 	{
-		trees.clear();
 
 		foreach (production; grammar) {
 			// Keep track of our current node as we move backwards
@@ -67,10 +68,8 @@ struct Reducer {
 		auto prod1 = Production([gd1, gd2, gd3], reduction1, null);
 		auto prod2 = Production([gd1, gd2, gd3], reduction2, null);
 
-		Reducer red;
-
 		// Should be ambiguous
-		assertThrown(red.build([prod1, prod2]));
+		assertThrown(Reducer([prod1, prod2]));
 	}
 
 	struct ReductionResult {
@@ -134,9 +133,7 @@ struct Reducer {
 		prods ~= Production([foo, bar, baz], foobarbaz, null);
 		prods ~= Production([foo, biz], foobiz, null);
 
-		Reducer red;
-
-		red.build(prods);
+		auto red = Reducer(prods);
 
 		auto result = red.reduce([foo, foo, biz, foo, bar]);
 		assert(result.reducesTo == foobar);
