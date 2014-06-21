@@ -38,13 +38,13 @@ class Token : GrammarElement {
 
 	@property size_t length() const { return rep.length; }
 
-	override const(Token*) asTerminal(GrammarElementID i) const { return def.id == i ? &this : null; }
+	override const(Token) asTerminal(GrammarElementID i) const { return def.id == i ? this : null; }
 
-	override const(Token*) asTerminal() const { return &this; }
+	override const(Token) asTerminal() const { return this; }
 
-	override ASTNode* asNonTerminal(GrammarElementID) { return null; }
+	override ASTNode asNonTerminal(GrammarElementID) { return null; }
 
-	override ASTNode* asNonTerminal() { return null; }
+	override ASTNode asNonTerminal() { return null; }
 
 	override string toString()
 	{

@@ -17,28 +17,39 @@ class ASTNode : GrammarElement {
 		Statement ///< sum;
 	}
 
-	this(GrammarElementID i, ASTNode* p = null)
+	this(GrammarElementID i, ASTNode p = null)
 	{
 		this(GrammarDefinition(ElementType.Nonterm, i), p);
 	}
 
-	this(GrammarDefinition d, ASTNode* p = null)
+	this(GrammarDefinition d, ASTNode p = null)
 	{
-		enforce(d.type == ElementType.Nonterm, "You cannot have an AST node as a terminal.");
 		super(d);
 		parent = p;
 	}
 
-	override const(Token*) asTerminal(GrammarElementID) const { return null; }
+	override const(Token) asTerminal(GrammarElementID) const { return null; }
 
-	override const(Token*) asTerminal() const { return null; }
+	override const(Token) asTerminal() const { return null; }
 
-	override ASTNode* asNonTerminal(GrammarElementID i) { return def.id == i ? &this : null; }
+	override ASTNode asNonTerminal(GrammarElementID i) { return def.id == i ? this : null; }
 
-	override ASTNode* asNonTerminal() { return &this; }
+	override ASTNode asNonTerminal() { return this; }
 
-	ASTNode* parent;
+	ASTNode parent;
 
-	ASTNode*[] children;
+}
 
+class InnerASTNode : ASTNode {
+
+	this(GrammarDefinition d, ASTNode p = null) { super(d, p); }
+
+	ASTNode[] children;
+}
+
+class LeafASTNode : ASTNode {
+
+	this(GrammarDefinition d, ASTNode p = null) { super(d, p); }
+
+	Token[] terminals;
 }

@@ -11,13 +11,13 @@ class GrammarElement {
 		def = d;
 	}
 
-	abstract const(Token*) asTerminal(GrammarElementID id) const;
+	abstract const(Token) asTerminal(GrammarElementID id) const;
 
-	abstract const(Token*) asTerminal() const;
+	abstract const(Token) asTerminal() const;
 
-	abstract ASTNode* asNonTerminal(GrammarElementID id);
+	abstract ASTNode asNonTerminal(GrammarElementID id);
 
-	abstract ASTNode* asNonTerminal();
+	abstract ASTNode asNonTerminal();
 
 	GrammarDefinition def;
 }
