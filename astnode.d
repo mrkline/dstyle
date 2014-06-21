@@ -17,9 +17,9 @@ class ASTNode : GrammarElement {
 		STATEMENT ///< sum;
 	}
 
-	this(GrammarElementID i, int precedence = int.max, ASTNode* p = null)
+	this(GrammarElementID i, ASTNode* p = null)
 	{
-		this(GrammarDefinition(ElementType.NONTERM, i, precedence), p);
+		this(GrammarDefinition(ElementType.NONTERM, i), p);
 	}
 
 	this(GrammarDefinition d, ASTNode* p = null)

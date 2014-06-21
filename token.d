@@ -22,9 +22,9 @@ enum CommonTokenIDs : GrammarElementID {
 /// A token, scanned from a source file
 class Token : GrammarElement {
 
-	this(GrammarElementID i, string r, int l, int c, int precedence = int.max)
+	this(GrammarElementID i, string r, int l, int c)
 	{
-		this(GrammarDefinition(ElementType.TERM, i, precedence), r, l, c);
+		this(GrammarDefinition(ElementType.TERM, i), r, l, c);
 	}
 
 	this(GrammarDefinition d, string r, int l, int c)

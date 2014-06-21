@@ -12,13 +12,11 @@ enum ElementType {
 struct GrammarDefinition {
 	ElementType type; ///< The element's type (terminal or nonterminal)
 	GrammarElementID id; ///< The element's ID
-	int precedence; ///< Lower means sooner in the order of operations. Mostly for terminals
 
 	/// Trivial constructor
-	this(ElementType t, GrammarElementID i, int prec = int.max)
+	this(ElementType t, GrammarElementID i)
 	{
 		type = t;
 		id =i;
-		precedence = prec;
 	}
 }
