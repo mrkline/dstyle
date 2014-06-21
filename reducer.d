@@ -58,12 +58,12 @@ struct Reducer {
 
 	unittest
 	{
-		auto gd1 = GrammarDefinition(ElementType.NONTERM, 3);
-		auto gd2 = GrammarDefinition(ElementType.NONTERM, 4);
-		auto gd3 = GrammarDefinition(ElementType.TERM, 3);
+		auto gd1 = GrammarDefinition(ElementType.Nonterm, 3);
+		auto gd2 = GrammarDefinition(ElementType.Nonterm, 4);
+		auto gd3 = GrammarDefinition(ElementType.Term, 3);
 
-		auto reduction1 = GrammarDefinition(ElementType.NONTERM, 42);
-		auto reduction2 = GrammarDefinition(ElementType.NONTERM, 43);
+		auto reduction1 = GrammarDefinition(ElementType.Nonterm, 42);
+		auto reduction2 = GrammarDefinition(ElementType.Nonterm, 43);
 
 		auto prod1 = Production([gd1, gd2, gd3], reduction1, null);
 		auto prod2 = Production([gd1, gd2, gd3], reduction2, null);
@@ -119,14 +119,14 @@ struct Reducer {
 
 	unittest
 	{
-		auto foo = GrammarDefinition(ElementType.TERM, 1);
-		auto bar = GrammarDefinition(ElementType.TERM, 2);
-		auto baz = GrammarDefinition(ElementType.TERM, 3);
-		auto biz = GrammarDefinition(ElementType.TERM, 4);
+		auto foo = GrammarDefinition(ElementType.Term, 1);
+		auto bar = GrammarDefinition(ElementType.Term, 2);
+		auto baz = GrammarDefinition(ElementType.Term, 3);
+		auto biz = GrammarDefinition(ElementType.Term, 4);
 
-		auto foobar = GrammarDefinition(ElementType.NONTERM, 42);
-		auto foobarbaz = GrammarDefinition(ElementType.NONTERM, 43);
-		auto foobiz = GrammarDefinition(ElementType.NONTERM, 44);
+		auto foobar = GrammarDefinition(ElementType.Nonterm, 42);
+		auto foobarbaz = GrammarDefinition(ElementType.Nonterm, 43);
+		auto foobiz = GrammarDefinition(ElementType.Nonterm, 44);
 
 		Production[] prods;
 		prods ~= Production([foo, bar], foobar, null);

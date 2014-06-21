@@ -47,7 +47,7 @@ class NewlineGenerator : TokenGenerator {
 	// Will be removed by the list of finalists before it can be checked if it is not one
 	@property override bool isInFinalState() const { return true; }
 
-	@property override GrammarElementID tokenID() const { return CommonTokenIDs.NEWLINE; }
+	@property override GrammarElementID tokenID() const { return CommonTokenIDs.Newline; }
 
 	@property override string name() const { return "Newline"; }
 
@@ -64,7 +64,7 @@ class WhitespaceGenerator : TokenGenerator {
 
 	@property override bool isInFinalState() const { return true; }
 
-	@property override GrammarElementID tokenID() const { return CommonTokenIDs.SPACE; }
+	@property override GrammarElementID tokenID() const { return CommonTokenIDs.Space; }
 
 	@property override string name() const { return "Whitespace"; }
 }
@@ -120,7 +120,7 @@ class IDTokenGenerator : TokenGenerator {
 
 	@property override bool isInFinalState() const { return true; }
 
-	@property override GrammarElementID tokenID() const { return CommonTokenIDs.SPACE; }
+	@property override GrammarElementID tokenID() const { return CommonTokenIDs.Space; }
 
 	@property override string name() const { return "ID"; }
 

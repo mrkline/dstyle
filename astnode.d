@@ -9,22 +9,22 @@ import std.exception;
 class ASTNode : GrammarElement {
 
 	enum CommonNontermIDs : GrammarElementID {
-		INTLIT, ///< Integer literal
+		Intlit, ///< Integer literal
 		ID, ///< ID
-		VALUE, ///< A simple value (literals, IDs, etc.)
-		PRODUCT, ///< value, product * value
-		SUM, ///< product, sum + product
-		STATEMENT ///< sum;
+		Value, ///< A simple value (literals, IDs, etc.)
+		Product, ///< value, product * value
+		Sum, ///< product, sum + product
+		Statement ///< sum;
 	}
 
 	this(GrammarElementID i, ASTNode* p = null)
 	{
-		this(GrammarDefinition(ElementType.NONTERM, i), p);
+		this(GrammarDefinition(ElementType.Nonterm, i), p);
 	}
 
 	this(GrammarDefinition d, ASTNode* p = null)
 	{
-		enforce(d.type == ElementType.NONTERM, "You cannot have an AST node as a terminal.");
+		enforce(d.type == ElementType.Nonterm, "You cannot have an AST node as a terminal.");
 		super(d);
 		parent = p;
 	}

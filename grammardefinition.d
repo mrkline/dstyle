@@ -4,8 +4,8 @@ alias int GrammarElementID;
 
 /// Specifies an element's type (terminal or nonterminal)
 enum ElementType {
-	TERM, ///< Terminal
-	NONTERM ///< Nonterminal
+	Term, ///< Terminal
+	Nonterm ///< Nonterminal
 }
 
 /// A definition of a single terminal or nonterminal

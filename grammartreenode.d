@@ -40,9 +40,9 @@ unittest
 {
 	GrammarTreeNode base;
 	assert(base.translator == null);
-	immutable auto nextDef = GrammarDefinition(ElementType.TERM, 42);
+	immutable auto nextDef = GrammarDefinition(ElementType.Term, 42);
 	GrammarTreeNode* next = base.addChildAsNeeded(nextDef);
-	immutable auto lastDef = GrammarDefinition(ElementType.NONTERM, 25);
+	immutable auto lastDef = GrammarDefinition(ElementType.Nonterm, 25);
 	GrammarTreeNode* last = next.addChildAsNeeded(lastDef);
 	assert(*(nextDef in base.edges) == next);
 	assert(*(lastDef in next.edges) == last);

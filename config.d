@@ -2,47 +2,47 @@
 
 /// Used for line-ending related options
 enum LineEnding {
-	UNIX, ///< LF
-	WINDOWS, ///< CR LF (or, rarely, LF CR)
-	MAC, ///<  CR
-	AUTO ///< Use whatever is most common in the file
+	Unix, ///< LF
+	WindowsS, ///< CR LF (or, rarely, LF CR)
+	Mac, ///<  CR
+	Auto ///< Use whatever is most common in the file
 }
 
 /// Used for the placement of braces
 enum BraceRule {
-	SAME, ///< Braces start on the same line
-	NEXT, ///< Braces start on the next line
-	NEXT_INDENTED ///< Braces start on the next line, indented
+	Same, ///< Braces start on the same line
+	Next, ///< Braces start on the next line
+	NextIndented ///< Braces start on the next line, indented
 }
 
 /// Used for spacing
 enum SpaceRule {
-	NONE, ///< No space between items
-	SINGLE, ///< Single space between items
-	KEEP ///< Do not change spacing between items
+	None, ///< No space between items
+	Single, ///< Single space between items
+	Keep ///< Do not change spacing between items
 }
 
 /// Policy for using tab characters
 enum TabPolicy {
-	TABS, ///< Allow tab characters
-	SPACES, ///< Expand all tab characters to spaces
+	Tabs, ///< Allow tab characters
+	Spaces, ///< Expand all tab characters to spaces
 }
 
-TabPolicy tabPolicy = TabPolicy.TABS;
+TabPolicy tabPolicy = TabPolicy.Tabs;
 
 /// Policy for pointer declarations
 enum PointerDeclarations {
-	TYPE, ///< Place the pointer symbol (*, &, or &&) next to the type
-	MIDDLE, ///< Place the pointer operator in between the type and the name
-	NAME ///< Place the pointer operator next to the name
+	Type, ///< Place the pointer symbol (*, &, or &&) next to the type
+	Middle, ///< Place the pointer operator in between the type and the name
+	Name ///< Place the pointer operator next to the name
 }
 
-PointerDeclarations pointerDeclarations = PointerDeclarations.TYPE;
+PointerDeclarations pointerDeclarations = PointerDeclarations.Type;
 
 // Misc. stuff
 
 /// Line ending to use
-LineEnding endingToUse = LineEnding.UNIX;
+LineEnding endingToUse = LineEnding.Unix;
 
 /// true to trim trailing whitespace
 bool trimTrailingWhitespace = true;
@@ -81,21 +81,21 @@ IndentRules indentRules;
 
 /// Brace rules
 struct BraceRules {
-	BraceRule classes = BraceRule.SAME; ///< For class bodies
-	BraceRule lambdas = BraceRule.SAME; ///< For lambdas and anonymous classes
-	BraceRule functions = BraceRule.NEXT; ///< For functions/methods
-	BraceRule enums = BraceRule.SAME; ///< For enums
-	BraceRule blocks = BraceRule.SAME; ///< For control blocks
-	BraceRule caseBlocks = BraceRule.SAME; ///< For case statement blocks
+	BraceRule classes = BraceRule.Same; ///< For class bodies
+	BraceRule lambdas = BraceRule.Same; ///< For lambdas and anonymous classes
+	BraceRule functions = BraceRule.Next; ///< For functions/methods
+	BraceRule enums = BraceRule.Same; ///< For enums
+	BraceRule blocks = BraceRule.Same; ///< For control blocks
+	BraceRule caseBlocks = BraceRule.Same; ///< For case statement blocks
 }
 
 BraceRules braceRules;
 
 /// Spacing rules
 struct SpaceRules {
-	SpaceRule operators = SpaceRule.SINGLE; ///< Space operators
-	SpaceRule padParens = SpaceRule.NONE; ///< Pad the outside of parenthesis (usually just the left one)
-	SpaceRule padInParens = SpaceRule.NONE; ///< Pad the inside of parenthesis
+	SpaceRule operators = SpaceRule.Single; ///< Space operators
+	SpaceRule padParens = SpaceRule.None; ///< Pad the outside of parenthesis (usually just the left one)
+	SpaceRule padInParens = SpaceRule.None; ///< Pad the inside of parenthesis
 }
 
 SpaceRules spaceRules;

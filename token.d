@@ -9,14 +9,14 @@ import std.exception;
 /// Common token types, used by the scanner and all languages.
 /// Languages should obviously avoid using these values for other token types.
 enum CommonTokenIDs : GrammarElementID {
-	SPACE, ///< Tabs and spaces
-	NEWLINE, ///< A newline
+	Space, ///< Tabs and spaces
+	Newline, ///< A newline
 	ID, ///< An ID, be it for a function, variable, etc.
-	NUMLIT, ///< A numeric literal (int literal, float literal, etc.)
-	STRLIT, ///< A string literal
-	FLOW_COND, ///< A control flow keyword with a condition (if, while, for, etc.)
-	FLOW, ///< A control flow keyword without a condition (else, do, try, etc.)
-	UNCOMMON_START ///< Gives a starting value for language-specific token types
+	NumLit, ///< A numeric literal (int literal, float literal, etc.)
+	StrLit, ///< A string literal
+	FlowCond, ///< A control flow keyword with a condition (if, while, for, etc.)
+	Flow, ///< A control flow keyword without a condition (else, do, try, etc.)
+	UncommonStart ///< Gives a starting value for language-specific token types
 }
 
 /// A token, scanned from a source file
@@ -24,12 +24,12 @@ class Token : GrammarElement {
 
 	this(GrammarElementID i, string r, int l, int c)
 	{
-		this(GrammarDefinition(ElementType.TERM, i), r, l, c);
+		this(GrammarDefinition(ElementType.Term, i), r, l, c);
 	}
 
 	this(GrammarDefinition d, string r, int l, int c)
 	{
-		enforce(d.type == ElementType.TERM, "A token cannot be a non-terminal.");
+		enforce(d.type == ElementType.Term, "A token cannot be a non-terminal.");
 		super(d);
 		rep = r;
 		line = l;
@@ -49,10 +49,10 @@ class Token : GrammarElement {
 	override string toString()
 	{
 		switch (def.id) {
-			case CommonTokenIDs.NEWLINE:
+			case CommonTokenIDs.Newline:
 			return "\\n";
 
-			case CommonTokenIDs.SPACE:
+			case CommonTokenIDs.Space:
 			return "\\s";
 
 			default:

@@ -102,7 +102,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 			logCacheClear("scanloop");
 
 			// If the winner is a newline, figure out what kind it is and add to that tally
-			if (winner.tokenID == CommonTokenIDs.NEWLINE) {
+			if (winner.tokenID == CommonTokenIDs.Newline) {
 				if (fileTokens.back.length == 2)
 					++windowsNewlines;
 				else if (file[tokenStart] == '\n')
@@ -160,7 +160,7 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 		" (" ~ startingLine.to!string ~ ":" ~ startingCol.to!string ~ ")");
 	logCacheClear("scanloop");
 
-	if (winner.tokenID == CommonTokenIDs.NEWLINE) {
+	if (winner.tokenID == CommonTokenIDs.Newline) {
 		if (fileTokens.back.length == 2)
 			++windowsNewlines;
 		else if (file[tokenStart] == '\n')
@@ -203,15 +203,15 @@ unittest
 unittest
 {
 	enum TestID : GrammarElementID {
-		CLASS = CommonTokenIDs.UNCOMMON_START,
-		STRUCT
+		Class = CommonTokenIDs.UncommonStart,
+		Struct
 	}
 
 	TokenGenerator[] gens;
 	gens ~= new NewlineGenerator;
 	gens ~= new WhitespaceGenerator;
-	gens ~= new StaticTokenGenerator("class", TestID.CLASS);
-	gens ~= new StaticTokenGenerator("struct", TestID.STRUCT);
+	gens ~= new StaticTokenGenerator("class", TestID.Class);
+	gens ~= new StaticTokenGenerator("struct", TestID.Struct);
 	auto scanned = scanFile(readText("testfiles/statics.txt"), gens);
 }
 
