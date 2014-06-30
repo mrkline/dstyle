@@ -4,6 +4,7 @@ alias int GrammarElementID;
 
 /// Specifies an element's type (terminal or nonterminal)
 enum ElementType {
+	Epsilon, ///< Not an element. Useful for indicating the end of the token stream, etc.
 	Term, ///< Terminal
 	Nonterm ///< Nonterminal
 }
@@ -19,4 +20,9 @@ struct GrammarDefinition {
 		type = t;
 		id =i;
 	}
+}
+
+unittest
+{
+	assert(GrammarDefinition.init.type == ElementType.Epsilon);
 }
