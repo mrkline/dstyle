@@ -24,6 +24,7 @@ class ASTNode : GrammarElement {
 
 	this(GrammarDefinition d, ASTNode p = null)
 	{
+		enforce(d.type == ElementType.Nonterm, "An AST node must be a non-terminal.");
 		super(d);
 		parent = p;
 	}
@@ -38,18 +39,11 @@ class ASTNode : GrammarElement {
 
 	ASTNode parent;
 
+	GrammarElement[] children;
 }
 
 class InnerASTNode : ASTNode {
 
 	this(GrammarDefinition d, ASTNode p = null) { super(d, p); }
 
-	ASTNode[] children;
-}
-
-class LeafASTNode : ASTNode {
-
-	this(GrammarDefinition d, ASTNode p = null) { super(d, p); }
-
-	Token[] terminals;
 }

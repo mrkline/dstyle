@@ -40,7 +40,7 @@ struct Reducer {
 				currentNode = *matchingTreeNode;
 			}
 
-			for (long i = production.elements.length - 2; i >= 0; --i) {
+			for (int i = cast(int)production.elements.length - 2; i >= 0; --i) {
 				// Add nodes going backwards to the start of the production.
 				currentNode = currentNode.addChildAsNeeded(production.elements[i]);
 			}
@@ -82,7 +82,7 @@ struct Reducer {
 	 * \brief Reduces a series of grammar elements to a new one.
 	 * \param stack The current parse stack
 	 * \returns ReductionResult.init if no reduction can be made.
-	 *          If one can be made, a reslult contaitning the translator
+	 *          If one can be made, a result contaitning the translator
 	 *          that yields the reduction and the number of elements
 	 *          consumed by it
 	 *
@@ -94,10 +94,15 @@ struct Reducer {
 	ReductionResult reduce(S)(S[] stack) if (is(S == GrammarDefinition) || is(S == GrammarElement))
 	{
 		auto pop = {
-			static if (is(S == GrammarDefinition))
+			if (stack.length == 0)
+				return S.init;
+
+			static if (is(S == GrammarDefinition)) {
 				auto ret = stack[$-1];
-			else
+			}
+			else {
 				auto ret = stack[$-1].def;
+			}
 			stack = stack[0..$-1];
 			return ret;
 		};
@@ -115,6 +120,18 @@ struct Reducer {
 		}
 
 		return ret;
+	}
+
+	unittest
+	{
+		// A foo reduces to a bar
+		auto foo = GrammarDefinition(ElementType.Term, 1);
+		auto bar = GrammarDefinition(ElementType.Nonterm, 1);
+
+		auto fooToBar = Production([foo], bar, null);
+		auto red = Reducer([fooToBar]);
+
+		assert(red.reduce([foo]).reducesTo == bar);
 	}
 
 	unittest

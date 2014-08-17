@@ -29,7 +29,7 @@ class Token : GrammarElement {
 
 	this(GrammarDefinition d, string r, int l, int c)
 	{
-		enforce(d.type == ElementType.Term, "A token cannot be a non-terminal.");
+		enforce(d.type == ElementType.Term, "A token must be a terminal.");
 		super(d);
 		rep = r;
 		line = l;
