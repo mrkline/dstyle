@@ -1,4 +1,3 @@
-import grammardefinition;
 import grammarelement;
 import astnode;
 import precedence;
@@ -22,12 +21,12 @@ struct Parser {
 	@disable this();
 
 	@trusted // .keyas and .values is a system call apparently
-	this(in Production[] grammar,
-	     in PrecedenceRule[GrammarDefinition] precedenceRules = (PrecedenceRule[GrammarDefinition]).init)
+	this(Production[] grammar,
+	     PrecedenceRule[ClassInfo] precedenceRules = (PrecedenceRule[ClassInfo]).init)
 	in
 	{
 		foreach (k; precedenceRules.keys) {
-			assert(k != k.init);
+			assert(k !is null);
 		}
 		foreach (v; precedenceRules.values) {
 			// Do not allow any precedence rule to have negative or zero precedence.
@@ -40,27 +39,27 @@ struct Parser {
 		precedence = precedenceRules;
 	}
 
-	auto parse(T)(T[] tokens) if (is(T == GrammarDefinition) || is(T == Token))
+	auto parse(T)(T[] tokens) if (is(T == ClassInfo) || is(T == Token))
 	{
-		static if (is(T == GrammarDefinition))
+		static if (is(T == ClassInfo))
 			alias T S;
 		else
 			alias GrammarElement S;
 
-		GrammarDefinition defOf(S elem) {
-			static if (is (S == GrammarDefinition))
+		ClassInfo defOf(S elem) {
+			static if (is (S == ClassInfo))
 				return elem;
 			else
-				return elem.def;
+				return elem.classinfo;
 		}
 
-		GrammarDefinition lookaheadDef()
+		ClassInfo lookaheadDef()
 		{
 			if (tokens.length > 0) {
 				return defOf(tokens[0]);
 			}
 			else {
-				return GrammarDefinition.init;
+				return null;
 			}
 		}
 
@@ -128,9 +127,12 @@ struct Parser {
 
 	unittest
 	{
+		class Foo { }
+		class Bar { }
+
 		// A foo reduces to a bar
-		auto foo = GrammarDefinition(ElementType.Term, 1);
-		auto bar = GrammarDefinition(ElementType.Nonterm, 2);
+		auto foo = Foo.classinfo;
+		auto bar = Bar.classinfo;
 
 		auto fooToBar = Production([foo], bar, null);
 		auto parser = Parser([fooToBar]);
@@ -140,14 +142,21 @@ struct Parser {
 
 	unittest
 	{
-		int uid = 0;
-		auto id = GrammarDefinition(ElementType.Term, ++uid);
-		auto equals = GrammarDefinition(ElementType.Term, ++uid);
-		auto plus = GrammarDefinition(ElementType.Term, ++uid);
-		auto times = GrammarDefinition(ElementType.Term, ++uid);
+		class ID { }
+		class Equals { }
+		class Plus { }
+		class Times { }
 
-		auto exp = GrammarDefinition(ElementType.Nonterm, ++uid);
-		auto assignment = GrammarDefinition(ElementType.Nonterm, ++uid);
+		auto id = ID.classinfo;
+		auto equals = Equals.classinfo;
+		auto plus = Plus.classinfo;
+		auto times = Times.classinfo;
+
+		class Exp { }
+		class Assignment { }
+
+		auto exp = Exp.classinfo;
+		auto assignment = Assignment.classinfo;
 
 		auto precedence = [
 			equals : PrecedenceRule(1),
@@ -178,14 +187,14 @@ struct Parser {
 private:
 
 	/// Returns true if some tokens were reduced
-	bool reduce(S)(ref S[] parseStack) if (is(S == GrammarDefinition) || is(S == GrammarElement))
+	bool reduce(S)(ref S[] parseStack) if (is(S == ClassInfo) || is(S == GrammarElement))
 	{
 		auto reduction = reducer.reduce(parseStack);
 
 		immutable consumed = reduction.elementsConsumed;
 
 		if (consumed > 0) {
-			static if (is(S == GrammarDefinition)) {
+			static if (is(S == ClassInfo)) {
 				auto result = reduction.reducesTo;
 			}
 			else {
@@ -204,5 +213,5 @@ private:
 	}
 
 	Reducer reducer;
-	const PrecedenceRule[GrammarDefinition] precedence;
+	const PrecedenceRule[ClassInfo] precedence;
 }

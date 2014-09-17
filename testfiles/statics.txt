@@ -1,3 +1,0 @@
-	class
-	struct
-	struct

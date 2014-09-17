@@ -1,5 +1,4 @@
 import grammartreenode;
-import grammardefinition;
 import grammarelement;
 import production;
 
@@ -21,7 +20,7 @@ struct Reducer {
 
 	@disable this();
 
-	this(in Production[] grammar)
+	this(Production[] grammar)
 	{
 
 		foreach (production; grammar) {
@@ -46,24 +45,30 @@ struct Reducer {
 			}
 
 			// If the current node already has a reduction, we have an ambiguous grammar.
-			enforce(currentNode.translator == null && currentNode.reduction == null,
+			enforce(currentNode.translator is null && currentNode.reduction is null,
 				"The provided grammar is ambiguous");
 
 			// At the end of the chain, set the reduction
 			currentNode.translator = production.translator;
-			currentNode.reduction = new GrammarDefinition;
-			*currentNode.reduction = production.reducesTo;
+			currentNode.reduction = production.reducesTo;
 		}
 	}
 
 	unittest
 	{
-		auto gd1 = GrammarDefinition(ElementType.Nonterm, 3);
-		auto gd2 = GrammarDefinition(ElementType.Nonterm, 4);
-		auto gd3 = GrammarDefinition(ElementType.Term, 3);
+		class GD1 { }
+		class GD2 { }
+		class GD3 { }
 
-		auto reduction1 = GrammarDefinition(ElementType.Nonterm, 42);
-		auto reduction2 = GrammarDefinition(ElementType.Nonterm, 43);
+		auto gd1 = GD1.classinfo;
+		auto gd2 = GD2.classinfo;
+		auto gd3 = GD3.classinfo;
+
+		class Red1 { }
+		class Red2 { }
+
+		auto reduction1 = Red1.classinfo;
+		auto reduction2 = Red2.classinfo;
 
 		auto prod1 = Production([gd1, gd2, gd3], reduction1, null);
 		auto prod2 = Production([gd1, gd2, gd3], reduction2, null);
@@ -74,7 +79,7 @@ struct Reducer {
 
 	struct ReductionResult {
 		Production.SDTCallback translator;
-		GrammarDefinition reducesTo;
+		ClassInfo reducesTo;
 		int elementsConsumed;
 	}
 
@@ -91,17 +96,17 @@ struct Reducer {
 	 * We could call the translator and modify the stack ourselves,
 	 * but we'll leave that work to the caller.
 	 */
-	ReductionResult reduce(S)(S[] stack) if (is(S == GrammarDefinition) || is(S == GrammarElement))
+	ReductionResult reduce(S)(S[] stack) if (is(S == ClassInfo) || is(S == GrammarElement))
 	{
 		auto pop = {
 			if (stack.length == 0)
-				return S.init;
+				return null;
 
-			static if (is(S == GrammarDefinition)) {
+			static if (is(S == ClassInfo)) {
 				auto ret = stack[$-1];
 			}
 			else {
-				auto ret = stack[$-1].def;
+				auto ret = stack[$-1].classinfo;
 			}
 			stack = stack[0..$-1];
 			return ret;
@@ -112,9 +117,9 @@ struct Reducer {
 
 		for (GrammarTreeNode** curr = pop() in trees; curr != null; curr = pop() in (*curr).edges) {
 			++consumed;
-			if ((*curr).reduction != null) {
+			if ((*curr).reduction !is null) {
 				ret.translator = (*curr).translator;
-				ret.reducesTo = *(*curr).reduction;
+				ret.reducesTo = (*curr).reduction;
 				ret.elementsConsumed = consumed;
 			}
 		}
@@ -124,26 +129,38 @@ struct Reducer {
 
 	unittest
 	{
+		class Foo { }
+		class Bar { }
+
 		// A foo reduces to a bar
-		auto foo = GrammarDefinition(ElementType.Term, 1);
-		auto bar = GrammarDefinition(ElementType.Nonterm, 1);
+		auto foo = Foo.classinfo;
+		auto bar = Bar.classinfo;
 
 		auto fooToBar = Production([foo], bar, null);
 		auto red = Reducer([fooToBar]);
 
-		assert(red.reduce([foo]).reducesTo == bar);
+		assert(red.reduce([foo]).reducesTo is bar);
 	}
 
 	unittest
 	{
-		auto foo = GrammarDefinition(ElementType.Term, 1);
-		auto bar = GrammarDefinition(ElementType.Term, 2);
-		auto baz = GrammarDefinition(ElementType.Term, 3);
-		auto biz = GrammarDefinition(ElementType.Term, 4);
+		class Foo { }
+		class Bar { }
+		class Baz { }
+		class Biz { }
 
-		auto foobar = GrammarDefinition(ElementType.Nonterm, 42);
-		auto foobarbaz = GrammarDefinition(ElementType.Nonterm, 43);
-		auto foobiz = GrammarDefinition(ElementType.Nonterm, 44);
+		auto foo = Foo.classinfo;
+		auto bar = Bar.classinfo;
+		auto baz = Baz.classinfo;
+		auto biz = Biz.classinfo;
+
+		class FooBar { }
+		class FooBarBaz { }
+		class FooBiz { }
+
+		auto foobar = FooBar.classinfo;
+		auto foobarbaz = FooBarBaz.classinfo;
+		auto foobiz = FooBiz.classinfo;
 
 		Production[] prods;
 		prods ~= Production([foo, bar], foobar, null);
@@ -153,23 +170,23 @@ struct Reducer {
 		auto red = Reducer(prods);
 
 		auto result = red.reduce([foo, foo, biz, foo, bar]);
-		assert(result.reducesTo == foobar);
+		assert(result.reducesTo is foobar);
 		assert(result.elementsConsumed == 2);
 
 		result = red.reduce([foo, bar, foo, bar, baz]);
-		assert(result.reducesTo == foobarbaz);
+		assert(result.reducesTo is foobarbaz);
 		assert(result.elementsConsumed == 3);
 
 		result = red.reduce([foo, bar, foo, biz]);
-		assert(result.reducesTo == foobiz);
+		assert(result.reducesTo is foobiz);
 		assert(result.elementsConsumed == 2);
 
 		result = red.reduce([biz, bar, foo]);
-		assert(result == result.init);
+		assert(result is result.init);
 	}
 
 private:
 
-	GrammarTreeNode*[GrammarDefinition] trees;
+	GrammarTreeNode*[ClassInfo] trees;
 }
 

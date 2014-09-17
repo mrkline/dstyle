@@ -1,5 +1,4 @@
 import config;
-import grammardefinition;
 import log;
 import scannedfile;
 import token;
@@ -95,14 +94,14 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 
 			// We have a single finalist
 			const winner = finalists.front;
-			fileTokens ~= new Token(winner.tokenID, file[tokenStart .. i], startingLine, startingCol);
+			fileTokens ~= winner.getToken(file[tokenStart .. i], startingLine, startingCol);
 
 			logInfo("token " ~ fileTokens.back.toString() ~
 				" (" ~ startingLine.to!string ~ ":" ~ startingCol.to!string ~ ")");
 			logCacheClear("scanloop");
 
 			// If the winner is a newline, figure out what kind it is and add to that tally
-			if (winner.tokenID == CommonTokenIDs.Newline) {
+			if (cast(NewlineToken)fileTokens.back) {
 				if (fileTokens.back.length == 2)
 					++windowsNewlines;
 				else if (file[tokenStart] == '\n')
@@ -154,13 +153,13 @@ ScannedFile scanFile(string file, TokenGenerator[] generators)
 
 	// We have a single finalist
 	TokenGenerator winner = finalists.front;
-	fileTokens ~= new Token(winner.tokenID, file[tokenStart .. $], startingLine, startingCol);
+	fileTokens ~= winner.getToken(file[tokenStart .. $], startingLine, startingCol);
 
 	logInfo("token " ~ fileTokens.back.toString() ~
 		" (" ~ startingLine.to!string ~ ":" ~ startingCol.to!string ~ ")");
 	logCacheClear("scanloop");
 
-	if (winner.tokenID == CommonTokenIDs.Newline) {
+	if (cast(NewlineToken)fileTokens.back) {
 		if (fileTokens.back.length == 2)
 			++windowsNewlines;
 		else if (file[tokenStart] == '\n')
@@ -198,28 +197,4 @@ unittest
 	assert(scanned.tokens[2].col == 5);
 	assert(scanned.tokens[4].col == 5);
 	assert(scanned.tokens[6].col == 5);
-}
-
-unittest
-{
-	enum TestID : GrammarElementID {
-		Class = CommonTokenIDs.UncommonStart,
-		Struct
-	}
-
-	TokenGenerator[] gens;
-	gens ~= new NewlineGenerator;
-	gens ~= new WhitespaceGenerator;
-	gens ~= new StaticTokenGenerator("class", TestID.Class);
-	gens ~= new StaticTokenGenerator("struct", TestID.Struct);
-	auto scanned = scanFile(readText("testfiles/statics.txt"), gens);
-}
-
-unittest
-{
-	TokenGenerator[] gens;
-	gens ~= new NewlineGenerator;
-	gens ~= new WhitespaceGenerator;
-	gens ~= new IDTokenGenerator;
-	auto scanned = scanFile(readText("testfiles/IDs.txt"), gens);
 }

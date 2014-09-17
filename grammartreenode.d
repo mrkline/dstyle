@@ -1,18 +1,10 @@
-import grammardefinition;
 import production;
 
 @safe:
 
 struct GrammarTreeNode {
 
-	/// Postblit. Duplicates our edges map on copy
-	@trusted
-	this(this)
-	{
-		edges = edges.dup;
-	}
-
-	GrammarTreeNode* addChildAsNeeded(ref in GrammarDefinition def)
+	GrammarTreeNode* addChildAsNeeded(ClassInfo def)
 	{
 		auto existing = def in edges;
 
@@ -31,19 +23,23 @@ struct GrammarTreeNode {
 	Production.SDTCallback translator;
 
 	/// The reduction if this node represents the first element in a production
-	GrammarDefinition* reduction;
+	ClassInfo reduction;
 
-	GrammarTreeNode*[GrammarDefinition] edges;
+	GrammarTreeNode*[ClassInfo] edges;
 }
 
 unittest
 {
+	class NextDef { }
+	class LastDef { }
+
+	auto nextDef = NextDef.classinfo;
+	auto lastDef = LastDef.classinfo;
+
 	GrammarTreeNode base;
 	assert(base.translator == null);
-	immutable auto nextDef = GrammarDefinition(ElementType.Term, 42);
-	GrammarTreeNode* next = base.addChildAsNeeded(nextDef);
-	immutable auto lastDef = GrammarDefinition(ElementType.Nonterm, 25);
-	GrammarTreeNode* last = next.addChildAsNeeded(lastDef);
+	GrammarTreeNode* next = base.addChildAsNeeded(NextDef.classinfo);
+	GrammarTreeNode* last = next.addChildAsNeeded(LastDef.classinfo);
 	assert(*(nextDef in base.edges) == next);
 	assert(*(lastDef in next.edges) == last);
 	assert((nextDef in last.edges) == null);
