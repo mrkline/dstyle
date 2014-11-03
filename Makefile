@@ -16,10 +16,10 @@ debug:   DFLAGS += -g -debug -unittest
 release: DFLAGS += -O -release -inline -noboundscheck
 profile: DFLAGS += -g -O -profile
 
-debug release profile: $(OUT)
+debug release profile: dstyle
 
-$(OUT): $(OBJ)
-	$(DCC) $(DFLAGS) -of$@ $(OBJ) $(LIBS)
+dstyle: *.d
+	$(DCC) $(DFLAGS) -ofdstyle *.d $(LIBS)
 
 clean:
 	rm -f *~ $(OBJ) $(OUT) trace.{def,log}
