@@ -7,6 +7,17 @@ import std.exception;
 
 // TODO: Add logging
 
+
+/**
+ * Indicates whether or not a given type is either ClassInfo
+ * (i.e. a grammar element ID) or a grammar element.
+ *
+ * The reducer (and parser) can operate on a series of ClassInfo IDs,
+ * which is used mostly for testing purposes,
+ * or actual grammar elements.
+ */
+enum bool isInfoOrElement(T) = is(T == ClassInfo) || is(T : GrammarElement);
+
 /**
  * \brief Takes a parse stack from a shift-reduce parser
  *        and reduces as much of the top as possible to a terminal
@@ -83,7 +94,10 @@ struct Reducer {
 
 	/**
 	 * \brief Reduces a series of grammar elements to a new one.
-	 * \param stack The current parse stack
+	 * \param stack The current parse stack.
+	 *              This could either just be a stack of grammer element IDs
+	 *              (mostly just used for debugging)
+	 *              or an actual stack of GrammarElements
 	 * \returns ReductionResult.init if no reduction can be made.
 	 *          If one can be made, a result contaitning the translator
 	 *          that yields the reduction and the number of elements
@@ -93,8 +107,9 @@ struct Reducer {
 	 *
 	 * We could call the translator and modify the stack ourselves,
 	 * but we'll leave that work to the caller.
+	 *
 	 */
-	ReductionResult reduce(S)(S[] stack) if (is(S == ClassInfo) || is(S == GrammarElement))
+	ReductionResult getReduction(S)(S[] stack) if (isInfoOrElement!S)
 	{
 		auto pop = {
 			if (stack.length == 0)
@@ -104,16 +119,22 @@ struct Reducer {
 				auto ret = stack[$-1];
 			}
 			else {
-				auto ret = stack[$-1].classinfo;
+				// TODO: If we don't cast this to an object, it returns
+				// the classinfo of the GrammarElement interface.
+				// Should we just stop using the marker interface GrammarElement?
+				auto ret = (cast(Object)stack[$-1]).classinfo;
 			}
-			stack = stack[0..$-1];
+			stack = stack[0 .. $-1];
 			return ret;
 		};
 
 		ReductionResult ret;
 		int consumed;
 
-		for (GrammarTreeNode** curr = pop() in trees; curr != null; curr = pop() in (*curr).edges) {
+		// Descend our tree as far as we can,
+		// then note the translator for this reduction and what it reduces to.
+		for (GrammarTreeNode** curr = pop() in trees; curr != null;
+		     curr = pop() in (*curr).edges) {
 			++consumed;
 			if ((*curr).reduction !is null) {
 				ret.translator = (*curr).translator;
@@ -137,7 +158,7 @@ struct Reducer {
 		auto fooToBar = Production([foo], bar, null);
 		auto red = Reducer([fooToBar]);
 
-		assert(red.reduce([foo]).reducesTo is bar);
+		assert(red.getReduction([foo]).reducesTo is bar);
 	}
 
 	unittest
@@ -161,25 +182,28 @@ struct Reducer {
 		auto foobiz = FooBiz.classinfo;
 
 		Production[] prods;
+		// A foo and a bar reduce to a foobar
 		prods ~= Production([foo, bar], foobar, null);
+		// A foo, bar, and baz reduce to a foobarbaz
 		prods ~= Production([foo, bar, baz], foobarbaz, null);
+		// A foo and a biz reduce to a foobiz
 		prods ~= Production([foo, biz], foobiz, null);
 
 		auto red = Reducer(prods);
 
-		auto result = red.reduce([foo, foo, biz, foo, bar]);
+		auto result = red.getReduction([foo, foo, biz, foo, bar]);
 		assert(result.reducesTo is foobar);
 		assert(result.elementsConsumed == 2);
 
-		result = red.reduce([foo, bar, foo, bar, baz]);
+		result = red.getReduction([foo, bar, foo, bar, baz]);
 		assert(result.reducesTo is foobarbaz);
 		assert(result.elementsConsumed == 3);
 
-		result = red.reduce([foo, bar, foo, biz]);
+		result = red.getReduction([foo, bar, foo, biz]);
 		assert(result.reducesTo is foobiz);
 		assert(result.elementsConsumed == 2);
 
-		result = red.reduce([biz, bar, foo]);
+		result = red.getReduction([biz, bar, foo]);
 		assert(result is result.init);
 	}
 

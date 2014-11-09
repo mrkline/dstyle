@@ -16,6 +16,7 @@ struct PrecedenceRule {
 	this(PrecedenceLevel p, Associativity a = Associativity.left)
 	in
 	{
+		// Do not allow any precedence rule to have negative or zero precedence.
 		assert(p > p.init);
 	}
 	body
