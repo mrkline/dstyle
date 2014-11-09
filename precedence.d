@@ -1,6 +1,4 @@
 
-@safe:
-
 enum Associativity {
 	none, ///< Non-associative
 	left, ///< Left associative

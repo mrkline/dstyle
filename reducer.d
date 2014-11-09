@@ -7,8 +7,6 @@ import std.exception;
 
 // TODO: Add logging
 
-@safe:
-
 /**
  * \brief Takes a parse stack from a shift-reduce parser
  *        and reduces as much of the top as possible to a terminal

@@ -1,5 +1,3 @@
-@safe:
-
 /// Used for line-ending related options
 enum LineEnding {
 	Unix, ///< LF

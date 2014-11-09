@@ -1,7 +1,5 @@
 import token;
 
-@safe:
-
 /**
  * \brief Represents a scanned file, made of a list of tokens and a list of line endings
  *        (including trailing whitespace, if the user to keep it around for some reason)

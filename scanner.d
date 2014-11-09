@@ -10,8 +10,6 @@ import std.file; // For unit tests
 import std.range;
 import std.uni;
 
-@safe:
-
 ScannedFile scanFile(string file, TokenGenerator[] generators)
 {
 	scope(failure) logCacheFlush("scanloop");

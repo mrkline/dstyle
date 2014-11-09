@@ -1,7 +1,5 @@
 import grammarelement;
 
-@safe:
-
 /// A token, scanned from a source file
 class Token : GrammarElement {
 

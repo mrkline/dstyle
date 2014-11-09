@@ -8,8 +8,6 @@ import token;
 import std.algorithm;
 import std.exception;
 
-// @safe:
-
 /**
  * \brief A stupid shift-reduce parser.
  *
@@ -20,7 +18,6 @@ struct Parser {
 
 	@disable this();
 
-	@trusted // .keyas and .values is a system call apparently
 	this(Production[] grammar,
 	     PrecedenceRule[ClassInfo] precedenceRules = (PrecedenceRule[ClassInfo]).init)
 	in

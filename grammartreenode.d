@@ -1,7 +1,5 @@
 import production;
 
-@safe:
-
 struct GrammarTreeNode {
 
 	GrammarTreeNode* addChildAsNeeded(ClassInfo def)

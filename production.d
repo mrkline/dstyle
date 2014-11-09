@@ -3,8 +3,6 @@ import astnode;
 
 import std.exception;
 
-@safe:
-
 struct Production {
 
 	alias ASTNode delegate(GrammarElement[]) SDTCallback;

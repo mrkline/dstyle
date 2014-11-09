@@ -2,8 +2,6 @@ import std.ascii;
 
 import token;
 
-@safe:
-
 /// Interface that represents a state machine that can generate a token in the scanner.
 interface TokenGenerator {
 
