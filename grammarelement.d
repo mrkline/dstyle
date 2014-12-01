@@ -6,4 +6,4 @@
  * For now it will remain as a marker interface for the parser,
  * but this may be unnecessary.
  */
-interface GrammarElement { }
+abstract class GrammarElement { }

@@ -23,7 +23,7 @@ ClassInfo infoOf(S)(S elem) if (isInfoOrElement!S)
 	static if (is (S == ClassInfo))
 		return elem;
 	else
-		return (cast(Object)elem).classinfo;
+		return elem.classinfo;
 }
 
 

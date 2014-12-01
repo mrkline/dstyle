@@ -126,7 +126,7 @@ struct Reducer {
 				// TODO: If we don't cast this to an object, it returns
 				// the classinfo of the GrammarElement interface.
 				// Should we just stop using the marker interface GrammarElement?
-				auto ret = (cast(Object)stack[$-1]).classinfo;
+				auto ret = stack[$-1].classinfo;
 			}
 			stack = stack[0 .. $-1];
 			return ret;
