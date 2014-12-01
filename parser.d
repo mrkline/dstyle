@@ -46,26 +46,6 @@ struct Parser {
 		precedence = precedenceRules;
 	}
 
-	/// Gets the precedence of a grammer element or its ID
-	PrecedenceLevel precedenceOf(S)(S elem) if (isInfoOrElement!S)
-	{
-		auto rule = infoOf(elem) in precedence;
-		if (rule)
-			return rule.precedence;
-		else
-			return PrecedenceLevel.init;
-	}
-
-	/// Gets the associativity of a grammar element or its ID
-	Associativity associativityOf(S)(S elem) if (isInfoOrElement!S)
-	{
-		auto rule = infoOf(elem) in precedence;
-		if (rule)
-			return rule.associativity;
-		else
-			return Associativity.init;
-	}
-
 	/**
 	 * \brief Parses a series of tokens,
 	 *        or simulates said parsing with a series of token IDs
@@ -103,12 +83,6 @@ struct Parser {
 			return parseStack[$-1];
 		}
 
-		// Returns the highest precedence for items found in the stack
-		PrecedenceLevel highestStackPrecedence() {
-			auto precs = parseStack.map!(a => precedenceOf(a));
-			return std.algorithm.reduce!((a, b) => a >= b ? a : b)(PrecedenceLevel.init, precs);
-		}
-
 		// Shifts an element from the token stream into the parse stack
 		void shift() {
 			assert(tokens.length > 0, "Shift was called when all tokens have been read");
@@ -116,12 +90,35 @@ struct Parser {
 			tokens = tokens[1 .. $];
 		}
 
+		PrecedenceRule highestStackPrecedence() {
+			// TODO: Optimize?
+			auto precedences = parseStack
+				.map!(e => infoOf(e) in precedence)
+				.filter!(r => r !is null)
+				.map!(p => *p);
+
+			return std.algorithm.reduce!((a, b) => a.precedes(b) ? a : b)
+			                            (PrecedenceRule.init, precedences);
+		}
+
+		PrecedenceLevel lookaheadPrecedence() {
+			auto lp = lookaheadInfo() in precedence;
+			if (lp !is null)
+				return lp.precedence;
+			else
+				return PrecedenceLevel.init;
+		}
+
 		// The shift-reduce loop:
 		while (tokens.length > 0) {
 
+			auto lookPrecedence = lookaheadPrecedence();
+			auto highest = highestStackPrecedence();
+
 			if (parseStack.length == 0 ||
-				precedenceOf(lookaheadInfo) > highestStackPrecedence
-				/* or precedence is the same and we're right associative? */) {
+				lookPrecedence > highest.precedence ||
+				(lookPrecedence == highest.precedence &&
+				 highest.associativity == Associativity.right)) {
 				shift();
 			}
 			else {
@@ -264,7 +261,7 @@ struct Parser {
 		auto assignment = Assignment.classinfo;
 
 		auto precedence = [
-			equals : PrecedenceRule(1),
+			equals : PrecedenceRule(1, Associativity.right),
 			plus : PrecedenceRule(2),
 			times : PrecedenceRule(3),
 			id : PrecedenceRule(4)
@@ -288,6 +285,17 @@ struct Parser {
 			return new Sum(left, op, right);
 		});
 
+		auto productProc = Production([exp, times, exp], exp, (GrammarElement[] elems) {
+			assert(elems.length == 3);
+			auto left = cast(Expression)elems[0];
+			auto op = cast(Times)elems[1];
+			auto right = cast(Expression)elems[2];
+			assert(left);
+			assert(op);
+			assert(right);
+			return new Product(left, op, right);
+		});
+
 		auto equalsProd = Production([exp, equals, exp], exp, (GrammarElement[] elems) {
 			assert(elems.length == 3);
 			auto left = cast(Expression)elems[0];
@@ -299,8 +307,11 @@ struct Parser {
 			return new Assignment(left, op, right);
 		});
 
-		auto parser = Parser([idProd, sumProd, equalsProd], precedence);
-		Token[] tokens = [new ID("baz"), new Equals(), new ID("foo"), new Plus(), new ID("bar")];
+		auto parser = Parser([idProd, sumProd, productProc, equalsProd], precedence);
+		Token[] tokens = [new ID("wholeShebang"), new Equals(),
+		                  new ID("baz"), new Equals(),
+		                  new ID("foo"), new Plus(), new ID("bar"),
+		                  new Times(), new ID("biz")];
 
 		auto idResult = parser.parse(tokens);
 

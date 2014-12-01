@@ -27,7 +27,7 @@ struct PrecedenceRule {
 }
 
 /// Returns true if l precedes r
-pure bool precedes(T)(T l, T r) if (is(T == PrecedenceRule) || is(T == PrecedenceLevel))
+pure bool precedes(T)(const T l, const T r) if (is(T == PrecedenceRule) || is(T == PrecedenceLevel))
 {
 	static if (is(T == PrecedenceRule)) {
 		return l.precedence > r.precedence;
