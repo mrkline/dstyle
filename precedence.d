@@ -26,6 +26,7 @@ struct PrecedenceRule {
 	}
 }
 
+/// Returns true if l precedes r
 pure bool precedes(T)(T l, T r) if (is(T == PrecedenceRule) || is(T == PrecedenceLevel))
 {
 	static if (is(T == PrecedenceRule)) {

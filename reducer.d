@@ -40,7 +40,7 @@ struct Reducer {
 			// If there is not an element in trees for the last item in production, create it.
 			auto last = production.elements[$-1];
 			auto matchingTreeNode = last in trees;
-			if (matchingTreeNode == null) {
+			if (matchingTreeNode is null) {
 				currentNode = new GrammarTreeNode();
 				trees[last] = currentNode;
 			}
@@ -50,7 +50,7 @@ struct Reducer {
 
 			for (int i = cast(int)production.elements.length - 2; i >= 0; --i) {
 				// Add nodes going backwards to the start of the production.
-				currentNode = currentNode.addChildAsNeeded(production.elements[i]);
+				currentNode = currentNode.createChildAsNeeded(production.elements[i]);
 			}
 
 			// If the current node already has a reduction, we have an ambiguous grammar.
@@ -87,8 +87,11 @@ struct Reducer {
 	}
 
 	struct ReductionResult {
+		/// The syntax-directed translator for the elements being reduced
 		Production.SDTCallback translator;
+		/// The info/definition of the reudction result
 		ClassInfo reducesTo;
+		/// The amount of elements that will be consumed by the reduction
 		int elementsConsumed;
 	}
 
@@ -98,6 +101,7 @@ struct Reducer {
 	 *              This could either just be a stack of grammer element IDs
 	 *              (mostly just used for debugging)
 	 *              or an actual stack of GrammarElements
+	 *              (tokens and AST nodes).
 	 * \returns ReductionResult.init if no reduction can be made.
 	 *          If one can be made, a result contaitning the translator
 	 *          that yields the reduction and the number of elements
@@ -133,8 +137,8 @@ struct Reducer {
 
 		// Descend our tree as far as we can,
 		// then note the translator for this reduction and what it reduces to.
-		for (GrammarTreeNode** curr = pop() in trees; curr != null;
-		     curr = pop() in (*curr).edges) {
+		for (GrammarTreeNode** curr = trees.findClassOrBase(pop()); curr !is null;
+		     curr = (*curr).edges.findClassOrBase(pop())) {
 			++consumed;
 			if ((*curr).reduction !is null) {
 				ret.translator = (*curr).translator;
@@ -209,6 +213,6 @@ struct Reducer {
 
 private:
 
-	GrammarTreeNode*[ClassInfo] trees;
+	GrammarTree trees;
 }
 

@@ -62,7 +62,7 @@ string toDot(GrammarElement[] elements)
 pure void writeln(S...)(ref Appender!string app, S strings)
 {
 	foreach(s; strings)
-		app ~= s;
+		app ~= s.to!string;
 	app ~= "\n";
 }
 

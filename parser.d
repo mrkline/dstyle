@@ -23,7 +23,7 @@ ClassInfo infoOf(S)(S elem) if (isInfoOrElement!S)
 	static if (is (S == ClassInfo))
 		return elem;
 	else
-		return elem.classinfo;
+		return (cast(Object)elem).classinfo;
 }
 
 
@@ -99,7 +99,7 @@ struct Parser {
 
 		// Gets the top element of the stack
 		S top() {
-			enforce(parseStack.length > 0, "Top was called when the parse stack was empty.");
+			assert(parseStack.length > 0, "Top was called when the parse stack was empty.");
 			return parseStack[$-1];
 		}
 
@@ -111,6 +111,7 @@ struct Parser {
 
 		// Shifts an element from the token stream into the parse stack
 		void shift() {
+			assert(tokens.length > 0, "Shift was called when all tokens have been read");
 			parseStack ~= tokens[0];
 			tokens = tokens[1 .. $];
 		}
@@ -215,58 +216,97 @@ struct Parser {
 			this() { super("*", 3, 3); }
 		}
 
-		class IDNode : ASTNode {
+		auto id = ID.classinfo;
+		auto equals = Equals.classinfo;
+		auto plus = Plus.classinfo;
+		auto times = Times.classinfo;
+
+		class Expression : ASTNode { }
+
+		class IDNode : Expression {
 			this(ID theID) { id = theID; }
+
+			override string toString()
+			{
+				return "ID: " ~ id.toString();
+			}
+
+			mixin NoChildren;
 
 			ID id;
 		}
 
-		class Sum : ASTNode {
-			this(ASTNode l, ASTNode r)
+		class BinaryOpNode(O) : Expression {
+			this(Expression l, O o, Expression r)
 			{
 				left = l;
+				op = o;
 				right = r;
 				left.parent = right.parent = this;
 			}
 
-			ASTNode left, right;
+			override string toString() { return op.toString(); }
+
+			mixin BinaryChildren;
+
+			Expression left, right;
+			O op;
 		}
 
-		class Product : ASTNode {
-			this(ASTNode l, ASTNode r)
-			{
-				left = l;
-				right = r;
-				left.parent = right.parent = this;
-			}
+		alias BinaryOpNode!Plus Sum;
+		alias BinaryOpNode!Times Product;
+		alias BinaryOpNode!Equals Assignment;
 
-			ASTNode left, right;
-		}
+		auto exp = Expression.classinfo;
+		auto idNode = IDNode.classinfo;
+		auto sum = Sum.classinfo;
+		auto product = Product.classinfo;
+		auto assignment = Assignment.classinfo;
 
-		class Assignment : ASTNode {
-			this(ASTNode l, ASTNode r)
-			{
-				left = l;
-				right = r;
-				left.parent = right.parent = this;
-			}
+		auto precedence = [
+			equals : PrecedenceRule(1),
+			plus : PrecedenceRule(2),
+			times : PrecedenceRule(3),
+			id : PrecedenceRule(4)
+		];
 
-			ASTNode left, right;
-		}
-
-		auto idProd = Production([ID.classinfo], IDNode.classinfo, (GrammarElement[] elems) {
+		auto idProd = Production([id], exp, (GrammarElement[] elems) {
 			assert(elems.length == 1);
-			assert(cast(ID)elems[0]);
-			return new IDNode(cast(ID)elems[0]);
+			auto i = cast(ID)elems[0];
+			assert(i);
+			return new IDNode(i);
 		});
 
-		auto parser = Parser([idProd]);
-		Token[] tokens = [new ID("foo")];
+		auto sumProd = Production([exp, plus, exp], exp, (GrammarElement[] elems) {
+			assert(elems.length == 3);
+			auto left = cast(Expression)elems[0];
+			auto op = cast(Plus)elems[1];
+			auto right = cast(Expression)elems[2];
+			assert(left);
+			assert(op);
+			assert(right);
+			return new Sum(left, op, right);
+		});
+
+		auto equalsProd = Production([exp, equals, exp], exp, (GrammarElement[] elems) {
+			assert(elems.length == 3);
+			auto left = cast(Expression)elems[0];
+			auto op = cast(Equals)elems[1];
+			auto right = cast(Expression)elems[2];
+			assert(left);
+			assert(op);
+			assert(right);
+			return new Assignment(left, op, right);
+		});
+
+		auto parser = Parser([idProd, sumProd, equalsProd], precedence);
+		Token[] tokens = [new ID("baz"), new Equals(), new ID("foo"), new Plus(), new ID("bar")];
 
 		auto idResult = parser.parse(tokens);
-		assert(idResult.length == 1);
-		assert(cast(IDNode)idResult[0]);
-		assert((cast(IDNode)idResult[0]).id is tokens[0]);
+
+		import dot;
+		import std.stdio;
+		writeln(idResult.toDot());
 
 		// TODO: Continue testing
 	}
@@ -296,8 +336,8 @@ private:
 				// - The SDT didn't return null.
 				enforce(result !is null, "A translator returned a null AST node");
 				// - The SDT returned the type of element the production says it should.
-				enforce(result.classinfo == reduction.reducesTo,
-					"The translator returned a reduction that isn't the expected type");
+				// enforce(result.classinfo == reduction.reducesTo,
+				// 	"The translator returned a reduction that isn't the expected type");
 			}
 
 			// Slice off the elements of the stack we just reduced...
