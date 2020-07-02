@@ -80,3 +80,8 @@ See `LICENSE.md`
 **Related:** Can the author actually finish something instead of spinning his wheels in new technologies?
 
 The author hopes so, but in the meantime he's learning a lot.
+
+## Retrospective, July 2020
+
+Writing parsers for actual languages is a lot of work,
+but building ASTs is a bunch of fun, as is metaprogramming in D.
